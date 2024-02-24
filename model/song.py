@@ -9,17 +9,21 @@ import json
 
 
 class Song:
-    def __init__(self, id, file, title, artist, key, mode):
+    def __init__(self, id, file, title, artist, key=None, mode=None,tempo=None):
         self.file = file
         # meta data
         self.id = id
         self.title = title
         self.artist = artist
+        if not key or not mode:
+            key,mode = feature.extract_feature(self.file,feature="key")
         self.key = key
         self.mode = mode
-        self.tempo = 0
-        self.album = None
-        self.release = None
+        self.tempo = tempo or feature.extract_feature(self.file,feature="tempo")
+        self.album = ""
+        self.release = ""
+        self.language = ""
+        self.tags = ""
         self.chord = feature.extractBeatAlignedChordLabels(self.file)
         # Calculate transpose amount
         self.transpose_amount = feature.calculate_transpose_amount(self.key, self.mode)
@@ -29,18 +33,17 @@ class Song:
             self.chord_transposed = self.chord
         else:
             self.chord_transposed = feature.transposeBeatAlignedChordLabels(self.chord, self.transpose_amount)
-        # self.section = section.extractSongSection(file)
+        #self.section = section.extractSongSection(file)
         self.section = []
         # calculate chord summary patterns
         self.chord_pattern = pattern.summaryChordPattern(self.chord_transposed)
         # append diatonic anlysis
         for ptn in self.chord_pattern:
-            isMajor = self.mode == "major" == True or False
+            isMajor = self.mode == "major" and True or False
             roman_numerals, non_diatonic_chords,non_diatonic_count = analysis.anlysisromanMumerals(ptn["pattern"], isMajor)
             ptn["roman_label"] = roman_numerals
             ptn["non_diatonic_chords"] = non_diatonic_chords
             ptn["non_diatonic_chords_count"] = non_diatonic_count * int(ptn["matches"])
-
     def save(self, path):
         # save parsed feature to file
         with h5py.File(path, "w") as f:

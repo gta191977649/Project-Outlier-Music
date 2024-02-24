@@ -11,7 +11,6 @@ def summaryChordPattern(chordsArray):
     cost_threshold = 1
     matched_indices = set()  # Set to keep track of indices that have been matched
 
-
     # START
     chord_name_ls = []
     chord_theta_ls = []
@@ -25,7 +24,6 @@ def summaryChordPattern(chordsArray):
         chord_theta_ls.append(angle)
         chord_start_ls.append(time)
         chord_beat_ls.append(beat)
-    print(chord_theta_ls)
     i = 0
     while i < len(chord_theta_ls) - WINDOW + 1:
         reference_signal = chord_theta_ls[i:i + WINDOW]

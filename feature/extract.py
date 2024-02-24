@@ -54,7 +54,7 @@ def getChordVectorsAngleFromChords(chordsArray):
         angles.append(angle)
     return angles
 def getChordVectorsAngleFromChord(chord):
-    if chord == "N" or chord == "None":  # Skip None Chord
+    if chord == 'N' or chord == None:  # Skip None Chord
         return 0
     chord = chord.replace(":", "")
     c = Chord(chord)
@@ -104,10 +104,10 @@ def transposeBeatAlignedChordLabels(chordsArray, transpose_amount, target_scale=
             transpoed_chords.append(new_chord)
             continue
         chord = chord.replace(":", "")
-
         transposed_chord = Chord(chord)
         transposed_chord.transpose(transpose_amount)
-        new_chord = (time, beat, transposed_chord)
+
+        new_chord = (time, beat, str(transposed_chord))
         transpoed_chords.append(new_chord)
     return transpoed_chords
 def calculate_transpose_amount(original_key, original_mode):
@@ -149,3 +149,26 @@ def calculate_transpose_amount(original_key, original_mode):
         transpose_amount += 12
 
     return transpose_amount
+
+def extract_feature(file_path,feature):
+    if feature == 'tempo':
+        beats = madmom.features.beats.RNNBeatProcessor()(file_path)
+        when_beats = madmom.features.beats.BeatTrackingProcessor(fps=100)(beats)
+        m_res = scipy.stats.linregress(np.arange(len(when_beats)), when_beats)
+        # first_beat = m_res.intercept
+        beat_step = m_res.slope
+        return 60/beat_step
+    if feature == "deep_chroma":
+        dcp = DeepChromaProcessor()
+        chroma = dcp(file_path)
+        return chroma
+    if feature == "downbeats":
+        beat_processor = RNNDownBeatProcessor()
+        beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[4], fps=100)
+        beats = beat_decoder(beat_processor(file_path))
+    if feature == "key":
+        proc = CNNKeyRecognitionProcessor()(file_path)
+        detected = key_prediction_to_label(proc)
+        key = detected.split(" ")[0]
+        mode = detected.split(" ")[1]
+        return key,mode

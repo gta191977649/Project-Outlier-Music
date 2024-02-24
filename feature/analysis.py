@@ -58,8 +58,13 @@ def anlysisromanMumerals(chords, is_major=True):
     count_non_diatonic = 0
     non_diatonic_chords = []
     for chord in chords:
-        roman_numerals.append(chord_map.get(chord, "?"))  # Use "?" for unmatched chords
-        non_diatonic_chords.append(chord)
-        count_non_diatonic += 1
+        roman_numeral = chord_map.get(chord)
+        #roman_numerals.append(chord_map.get(chord, "?"))  # Use "?" for unmatched chords
+        if roman_numeral is None:
+            roman_numerals.append("?")
+            non_diatonic_chords.append(chord)
+            count_non_diatonic += 1
+        else:
+            roman_numerals.append(roman_numeral)
 
     return tuple(roman_numerals), non_diatonic_chords,count_non_diatonic
