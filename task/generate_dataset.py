@@ -4,7 +4,20 @@ from model.song import Song
 from multiprocessing import Pool
 from tqdm import tqdm
 
-
+key_number_map = {
+    0: "C",
+    1: "C#",
+    2: "D",
+    3: "D#",
+    4: "E",
+    5: "F",
+    6: "F#",
+    7: "G",
+    8: "G#",
+    9: "A",
+    10: "A#",
+    11: "B"
+}
 def process_song(args):
     item, base_path, audio_folder = args  # Unpack arguments
     id = item["id"]
