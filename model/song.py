@@ -80,8 +80,8 @@ class Song:
             chord_transposed_array = np.array(self.chord_transposed, dtype='S')
             g_chord.create_dataset("chord_original", data=chord_array)
             g_chord.create_dataset("chord_transposed", data=chord_transposed_array)
-            serialized_chord_pattern = [json.dumps(d) for d in self.chord_change]
-            chord_change_array = np.array(serialized_chord_pattern, dtype='S')
+
+            chord_change_array = np.array(json.dumps(self.chord_change), dtype='S')
             g_chord.create_dataset("chord_changes", chord_change_array)
 
             # save chord pattern
