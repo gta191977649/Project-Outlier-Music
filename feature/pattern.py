@@ -7,9 +7,9 @@ def extractChangeChordPattern(chordsArray):
     chord_time_ls = []
     chord_beat_ls = []
     for c in chordsArray:
+        time, beat, chord = c
         if chord == "N" or chord == None: continue
         if chord == current_name: continue
-        time, beat, chord = c
 
         chord_vaild_ls.append(chord)
         chord_time_ls.append(time)

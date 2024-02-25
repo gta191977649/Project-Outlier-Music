@@ -38,21 +38,23 @@ class Song:
         # calculate chord summary patterns
         self.chord_pattern = pattern.summaryChordPattern(self.chord_transposed)
         self.chord_change = pattern.extractChangeChordPattern(self.chord_transposed)
+        # append annotation
+        isMajor = self.mode == "major" and True or False
+        roman_numerals, non_diatonic_chords, non_diatonic_count = analysis.anlysisromanMumerals(
+            self.chord_change["valid_sequence"],
+            isMajor)
+        self.chord_change["roman_label"] = roman_numerals
+        self.chord_change["non_diatonic_chords"] = non_diatonic_chords
+        self.chord_change["non_diatonic_chords_count"] = non_diatonic_count
+
         # append diatonic analysis
         for ptn in self.chord_pattern:
-            isMajor = self.mode == "major" and True or False
             roman_numerals, non_diatonic_chords,non_diatonic_count = analysis.anlysisromanMumerals(ptn["pattern"], isMajor)
             ptn["roman_label"] = roman_numerals
             ptn["non_diatonic_chords"] = non_diatonic_chords
             ptn["non_diatonic_chords_count"] = non_diatonic_count * int(ptn["matches"])
 
-        for ptn in self.chord_change:
-            isMajor = self.mode == "major" and True or False
-            roman_numerals, non_diatonic_chords, non_diatonic_count = analysis.anlysisromanMumerals(ptn["valid_sequence"],
-                                                                                                    isMajor)
-            ptn["roman_label"] = roman_numerals
-            ptn["non_diatonic_chords"] = non_diatonic_chords
-            ptn["non_diatonic_chords_count"] = non_diatonic_count
+
 
     def save(self, path):
         # save parsed feature to file
