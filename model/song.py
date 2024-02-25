@@ -81,8 +81,9 @@ class Song:
             g_chord.create_dataset("chord_original", data=chord_array)
             g_chord.create_dataset("chord_transposed", data=chord_transposed_array)
 
-            chord_change_array = np.array(json.dumps(self.chord_change), dtype='S')
-            g_chord.create_dataset("chord_changes", chord_change_array)
+            chord_change_json = json.dumps(self.chord_change)
+            chord_change_array = np.array([chord_change_json],dtype='S')
+            g_chord.create_dataset("chord_changes", data=chord_change_array)
 
             # save chord pattern
             g_pattern = f.create_group("pattern")
