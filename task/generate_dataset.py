@@ -60,11 +60,9 @@ def generate_dataset(base_path, dataset="music4all"):
             args = [(item, base_path, audio_folder) for item in items]  # Prepare arguments
 
             with Pool(processes=os.cpu_count(), initializer=init_worker) as pool:
-                # Use imap_unordered with a generator expression for tqdm progress bar
                 results = list(tqdm(pool.imap_unordered(process_song, args),
                                     total=len(items), desc="Processing songs"))
-
-                # Optionally, print results or handle them as needed
+                
                 for result in results:
                     print(result)
 
