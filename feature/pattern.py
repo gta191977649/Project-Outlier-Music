@@ -1,5 +1,28 @@
 from feature import extract as feature
 from tslearn.metrics import dtw_path,dtw
+
+def extractChangeChordPattern(chordsArray):
+    current_name = None
+    chord_vaild_ls = []
+    chord_time_ls = []
+    chord_beat_ls = []
+    for c in chordsArray:
+        if chord == "N" or chord == None: continue
+        if chord == current_name: continue
+        time, beat, chord = c
+
+        chord_vaild_ls.append(chord)
+        chord_time_ls.append(time)
+        chord_beat_ls.append(time)
+
+        current_name = c
+    chord_sequence = {
+        'valid_sequence':chord_vaild_ls,
+        'time':chord_time_ls,
+        "beat":chord_beat_ls
+    }
+    return chord_sequence
+
 def summaryChordPattern(chordsArray):
     print("Extracting Summary Chord Pattern ...")
 

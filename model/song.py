@@ -37,13 +37,23 @@ class Song:
         self.section = []
         # calculate chord summary patterns
         self.chord_pattern = pattern.summaryChordPattern(self.chord_transposed)
-        # append diatonic anlysis
+        self.chord_change = pattern.extractChangeChordPattern(self.chord_transposed)
+        # append diatonic analysis
         for ptn in self.chord_pattern:
             isMajor = self.mode == "major" and True or False
             roman_numerals, non_diatonic_chords,non_diatonic_count = analysis.anlysisromanMumerals(ptn["pattern"], isMajor)
             ptn["roman_label"] = roman_numerals
             ptn["non_diatonic_chords"] = non_diatonic_chords
             ptn["non_diatonic_chords_count"] = non_diatonic_count * int(ptn["matches"])
+
+        for ptn in self.chord_change:
+            isMajor = self.mode == "major" and True or False
+            roman_numerals, non_diatonic_chords, non_diatonic_count = analysis.anlysisromanMumerals(ptn["valid_sequence"],
+                                                                                                    isMajor)
+            ptn["roman_label"] = roman_numerals
+            ptn["non_diatonic_chords"] = non_diatonic_chords
+            ptn["non_diatonic_chords_count"] = non_diatonic_count
+
     def save(self, path):
         # save parsed feature to file
         with h5py.File(path, "w") as f:
@@ -68,6 +78,10 @@ class Song:
             chord_transposed_array = np.array(self.chord_transposed, dtype='S')
             g_chord.create_dataset("chord_original", data=chord_array)
             g_chord.create_dataset("chord_transposed", data=chord_transposed_array)
+            serialized_chord_pattern = [json.dumps(d) for d in self.chord_change]
+            chord_change_array = np.array(serialized_chord_pattern, dtype='S')
+            g_chord.create_dataset("chord_changes", chord_change_array)
+
             # save chord pattern
             g_pattern = f.create_group("pattern")
             serialized_chord_pattern = [json.dumps(d) for d in self.chord_pattern]
