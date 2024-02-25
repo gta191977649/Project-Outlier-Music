@@ -82,7 +82,7 @@ class Song:
             g_chord.create_dataset("chord_transposed", data=chord_transposed_array)
 
             chord_change_json = json.dumps(self.chord_change)
-            chord_change_array = np.array([chord_change_json],dtype='S')
+            chord_change_array = np.array(chord_change_json,dtype='S')
             g_chord.create_dataset("chord_changes", data=chord_change_array)
 
             # save chord pattern
@@ -97,3 +97,42 @@ class Song:
             g_section.create_dataset("section_label", data=section_array)
 
         print(f"✅{path} saved!")
+
+    @classmethod
+    def from_h5(cls, file_path):
+        # Open the HDF5 file for reading
+        with h5py.File(file_path, 'r') as f:
+            # Initialize the song object with metadata
+            g_meta = f['metadata']
+            id = g_meta['id'][()].decode('utf-8')
+            title = g_meta['title'][()].decode('utf-8')
+            artist = g_meta['artist'][()].decode('utf-8')
+            key = g_meta['key'][()].decode('utf-8')
+            mode = g_meta['mode'][()].decode('utf-8')
+            tempo = g_meta['tempo'][()]
+
+            # Create the song instance
+            song = cls(id=id, file=None, title=title, artist=artist, key=key, mode=mode, tempo=tempo)
+
+            # Set additional attributes from the HDF5 file
+            song.album = g_meta['album'][()].decode('utf-8') if 'album' in g_meta else ""
+            song.release = g_meta['release'][()].decode('utf-8') if 'release' in g_meta else ""
+
+            # Load and set chords
+            g_chord = f['chord']
+            song.chord = [ch.decode('utf-8') for ch in g_chord['chord_original']]
+            song.chord_transposed = [ch.decode('utf-8') for ch in g_chord['chord_transposed']]
+
+            # Load and set chord changes
+            chord_changes_json = g_chord['chord_changes'][0].decode('utf-8')
+            song.chord_change = json.loads(chord_changes_json)
+
+            # Load and set chord patterns
+            g_pattern = f['pattern']
+            song.chord_pattern = [json.loads(pat.decode('utf-8')) for pat in g_pattern['chord_pattern']]
+
+            # Load and set sections
+            g_section = f['section']
+            song.section = [sec.decode('utf-8') for sec in g_section['section_label']]
+
+        return song

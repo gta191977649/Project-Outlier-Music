@@ -15,7 +15,7 @@ def extractChangeChordPattern(chordsArray):
         chord_time_ls.append(time)
         chord_beat_ls.append(time)
 
-        current_name = c
+        current_name = chord
     chord_sequence = {
         'valid_sequence':chord_vaild_ls,
         'time':chord_time_ls,
