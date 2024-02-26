@@ -1,9 +1,9 @@
 import pandas as pd
 import os
 # Load the dataset
-csv_info_path = "/Users/nurupo/Desktop/dev/Project-Outlier-Music/dataset/music4all/pop_songs.csv"
+csv_info_path = "/Users/nurupo/Desktop/dev/music4all/pop_songs.csv"
 df = pd.read_csv(csv_info_path)
-output_csv_path = os.path.join(os.path.dirname(csv_info_path), "stratified_songs_pop.csv")
+output_csv_path = os.path.join(os.path.dirname(csv_info_path), "stratified_songs_pop_2.csv")
 
 # Convert 'release' to integer if it's not already
 df['release'] = df['release'].astype(int)
@@ -16,7 +16,7 @@ min_songs_per_year = df_filtered['release'].value_counts().min()
 
 # Perform stratified sampling
 stratified_sample = df_filtered.groupby('release', group_keys=False).apply(
-    lambda x: x.sample(min(len(x), min_songs_per_year), random_state=1)
+    lambda x: x.sample(min(len(x), min_songs_per_year), random_state=None)
 )
 
 # Save the stratified sample to a new CSV file

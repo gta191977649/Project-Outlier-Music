@@ -62,6 +62,7 @@ def getChordVectorsAngleFromChord(chord):
     angle = map_vector(notes, chord).temp_theta
     return angle
 def extractBeatAlignedChordLabels(file):
+    if not file: return
     print("Extract Beat Aligned Chord ...")
     t_s = time.time()
     # detect chord
@@ -95,6 +96,7 @@ def extractBeatAlignedChordLabels(file):
     print(f"✅Beat Aligned Chord: {time.time() - t_s}")
     return chordsArray
 def transposeBeatAlignedChordLabels(chordsArray, transpose_amount, target_scale="C"):
+    if not chordsArray: return
     print("Tranpose Beat Aligned Chord ...")
     transpoed_chords = []
     for c in chordsArray:
@@ -151,6 +153,7 @@ def calculate_transpose_amount(original_key, original_mode):
     return transpose_amount
 
 def extract_feature(file_path,feature):
+    if not file_path: return None
     if feature == 'tempo':
         beats = madmom.features.beats.RNNBeatProcessor()(file_path)
         when_beats = madmom.features.beats.BeatTrackingProcessor(fps=100)(beats)

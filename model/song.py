@@ -28,7 +28,7 @@ class Song:
         # Calculate transpose amount
         self.transpose_amount = feature.calculate_transpose_amount(self.key, self.mode)
         self.chord_transposed = []
-        if self.transpose_amount == 0:
+        if file and self.transpose_amount == 0:
             print(f"Skip transpose for {title}, since it's already on standard!")
             self.chord_transposed = self.chord
         else:
@@ -39,20 +39,21 @@ class Song:
         self.chord_pattern = pattern.summaryChordPattern(self.chord_transposed)
         self.chord_change = pattern.extractChangeChordPattern(self.chord_transposed)
         # append annotation
-        isMajor = self.mode == "major" and True or False
-        roman_numerals, non_diatonic_chords, non_diatonic_count = analysis.anlysisromanMumerals(
-            self.chord_change["valid_sequence"],
-            isMajor)
-        self.chord_change["roman_label"] = roman_numerals
-        self.chord_change["non_diatonic_chords"] = non_diatonic_chords
-        self.chord_change["non_diatonic_chords_count"] = non_diatonic_count
+        if file:
+            isMajor = self.mode == "major" and True or False
+            roman_numerals, non_diatonic_chords, non_diatonic_count = analysis.anlysisromanMumerals(
+                self.chord_change["valid_sequence"],
+                isMajor)
+            self.chord_change["roman_label"] = roman_numerals
+            self.chord_change["non_diatonic_chords"] = non_diatonic_chords
+            self.chord_change["non_diatonic_chords_count"] = non_diatonic_count
 
-        # append diatonic analysis
-        for ptn in self.chord_pattern:
-            roman_numerals, non_diatonic_chords,non_diatonic_count = analysis.anlysisromanMumerals(ptn["pattern"], isMajor)
-            ptn["roman_label"] = roman_numerals
-            ptn["non_diatonic_chords"] = non_diatonic_chords
-            ptn["non_diatonic_chords_count"] = non_diatonic_count * int(ptn["matches"])
+            # append diatonic analysis
+            for ptn in self.chord_pattern:
+                roman_numerals, non_diatonic_chords,non_diatonic_count = analysis.anlysisromanMumerals(ptn["pattern"], isMajor)
+                ptn["roman_label"] = roman_numerals
+                ptn["non_diatonic_chords"] = non_diatonic_chords
+                ptn["non_diatonic_chords_count"] = non_diatonic_count * int(ptn["matches"])
 
 
 
@@ -100,7 +101,6 @@ class Song:
 
     @classmethod
     def from_h5(cls, file_path):
-        # Open the HDF5 file for reading
         with h5py.File(file_path, 'r') as f:
             # Initialize the song object with metadata
             g_meta = f['metadata']
@@ -109,30 +109,35 @@ class Song:
             artist = g_meta['artist'][()].decode('utf-8')
             key = g_meta['key'][()].decode('utf-8')
             mode = g_meta['mode'][()].decode('utf-8')
+            album = g_meta['album'][()].decode('utf-8')
+            release = g_meta['release'][()]
             tempo = g_meta['tempo'][()]
+            transpose_amount = g_meta['transpose_amount'][()]
 
-            # Create the song instance
-            song = cls(id=id, file=None, title=title, artist=artist, key=key, mode=mode, tempo=tempo)
-
-            # Set additional attributes from the HDF5 file
-            song.album = g_meta['album'][()].decode('utf-8') if 'album' in g_meta else ""
-            song.release = g_meta['release'][()].decode('utf-8') if 'release' in g_meta else ""
-
-            # Load and set chords
+            # load from group
             g_chord = f['chord']
-            song.chord = [ch.decode('utf-8') for ch in g_chord['chord_original']]
-            song.chord_transposed = [ch.decode('utf-8') for ch in g_chord['chord_transposed']]
+            chord_original = g_chord['chord_original'][:].astype(str).tolist()
+            chord_transposed = g_chord['chord_transposed'][:].astype(str).tolist()
+            chord_changes_json = g_chord['chord_changes'][()].decode('utf-8')  # Access and decode in one step
+            chord_changes_json = json.loads(chord_changes_json)
 
-            # Load and set chord changes
-            chord_changes_json = g_chord['chord_changes'][0].decode('utf-8')
-            song.chord_change = json.loads(chord_changes_json)
-
-            # Load and set chord patterns
             g_pattern = f['pattern']
-            song.chord_pattern = [json.loads(pat.decode('utf-8')) for pat in g_pattern['chord_pattern']]
+            chord_pattern = [json.loads(pat.decode('utf-8')) for pat in g_pattern['chord_pattern'][:]]
 
-            # Load and set sections
             g_section = f['section']
-            song.section = [sec.decode('utf-8') for sec in g_section['section_label']]
+            section = [sec.decode('utf-8') for sec in g_section['section_label'][:]]
 
+        # creates a new song instance
+        song = cls(id=id, file=None, title=title, artist=artist, key=key, mode=mode, tempo=None)
+        song.album = album
+        song.tempo = tempo
+        song.release = release
+        song.transpose_amount = transpose_amount
+        song.chord = chord_original
+        song.chord_transposed = chord_transposed
+        song.chord_change = chord_changes_json
+        song.chord_pattern = chord_pattern
+        song.section = section
         return song
+
+

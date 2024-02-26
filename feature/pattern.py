@@ -2,6 +2,7 @@ from feature import extract as feature
 from tslearn.metrics import dtw_path,dtw
 
 def extractChangeChordPattern(chordsArray):
+    if not chordsArray: return []
     current_name = None
     chord_vaild_ls = []
     chord_time_ls = []
@@ -24,6 +25,7 @@ def extractChangeChordPattern(chordsArray):
     return chord_sequence
 
 def summaryChordPattern(chordsArray):
+    if not chordsArray: return []
     print("Extracting Summary Chord Pattern ...")
 
     START_ON_DOWNBEAT = True  # Set algorithm to only start search on chord that is on downbeat
@@ -42,6 +44,7 @@ def summaryChordPattern(chordsArray):
     # Loop through Chords
     for c in chordsArray:
         time, beat, chord = c
+        if chord == "N": continue
         angle = feature.getChordVectorsAngleFromChord(chord)
         chord_name_ls.append(chord)
         chord_theta_ls.append(angle)
