@@ -68,3 +68,31 @@ def anlysisromanMumerals(chords, is_major=True):
             roman_numerals.append(roman_numeral)
 
     return tuple(roman_numerals), non_diatonic_chords,count_non_diatonic
+
+
+from pychord import Chord
+
+def chord_in_list(chord, chords_list):
+    return chord in chords_list
+
+def identify_borrowed_chords(progression, mode):
+    c_major_chords = ["Cmaj", "Dmin", "Emin", "Fmaj", "Gmaj", "Amin", "Bdim"]
+    c_minor_chords = ["Cmin", "Ddim", "Ebmaj", "Fmin", "Gmin", "Abmaj", "Bbmaj"]
+    a_minor_chords = ["Amin", "Bdim", "Cmaj", "Dmin", "Emin", "Fmaj", "Gmaj"]
+    a_major_chords = ["Amaj", "Bmin", "C#min", "Dmaj", "Emaj", "F#min", "G#dim"]
+
+    borrowed = []
+
+    if mode == "major":
+        reference_chords = c_major_chords
+        compare_chords = c_minor_chords  # In a major key, borrowed chords come from the parallel minor
+    elif mode == "minor":
+        reference_chords = a_minor_chords
+        compare_chords = a_major_chords  # In a minor key, borrowed chords might come from the parallel major
+
+    for chord_str in progression:
+        chord_str = chord_str.replace(":", "")
+        if not chord_in_list(chord_str, reference_chords) and chord_in_list(chord_str, compare_chords):
+            borrowed.append(chord_str)
+
+    return borrowed

@@ -24,6 +24,7 @@ class Song:
         self.release = ""
         self.language = ""
         self.tags = ""
+        self.popularity = 0
         self.chord = feature.extractBeatAlignedChordLabels(self.file)
         # Calculate transpose amount
         self.transpose_amount = feature.calculate_transpose_amount(self.key, self.mode)
