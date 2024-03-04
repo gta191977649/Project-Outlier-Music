@@ -34,8 +34,8 @@ class Song:
             self.chord_transposed = self.chord
         else:
             self.chord_transposed = feature.transposeBeatAlignedChordLabels(self.chord, self.transpose_amount)
-        #self.section = section.extractSongSection(file)
-        self.section = []
+        self.section = section.extractSongSection(file)
+        #self.section = []
         # calculate chord summary patterns
         self.chord_pattern = pattern.summaryChordPattern(self.chord_transposed)
         self.chord_change = pattern.extractChangeChordPattern(self.chord_transposed)
@@ -95,7 +95,9 @@ class Song:
 
             # save section label
             g_section = f.create_group("section")
-            section_array = np.array(self.section, dtype='S')
+            serialized_section_pattern = [json.dumps(d) for d in self.section]
+            #section_array = np.array(self.section, dtype='S')
+            section_array = np.array(serialized_section_pattern, dtype='S')
             g_section.create_dataset("section_label", data=section_array)
 
         print(f"✅{path} saved!")

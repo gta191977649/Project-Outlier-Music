@@ -4,5 +4,7 @@ import config as CONF
 
 def extractSongSection(file):
     result = allin1.analyze(file,device=CONF.ML_DEVICES)
-    #print(result)
-    return result.segments
+    output = []
+    for section in result.segments:
+        output.append({"label":section.label,"start":section.start,"end":section.end})
+    return output
