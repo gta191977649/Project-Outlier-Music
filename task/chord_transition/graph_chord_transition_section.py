@@ -3,27 +3,28 @@ from model.song import Song
 from plot.chord_transition_plot import *
 
 SECTION_COLOR = {
-    "intro":"blue",
-    "verse":"green",
-    "solo":"yellow",
-    "bridge":"orange",
+    "intro":"tab:purple",
+    "verse":"blue",
+    "solo":"tab:orange",
+    "bridge":"tab:brown",
     "end":"black",
-    "outro":"pink",
+    "outro":"tab:pink",
     "chorus":"red",
-    "inst":"pink",
-    "start":"pink",
+    "inst":"tab:pink",
+    "start":"tab:pink",
+    "break":"tab:pink",
 }
 
 FREQ = {}
 def find_section_label(time,s):
     for section in s:
-        if section['start'] <= time < section['end']:
+        if section['start'] >= time < section['end']:
             return section['label']
     return None
 
 
 if __name__ == '__main__':
-    TARGET_MODE = "major"
+    TARGET_MODE = "minor"
     PATH = "/Users/nurupo/Desktop/dev/music4all/europe/"
     # loop all folder
     song_collections = []
@@ -45,12 +46,13 @@ if __name__ == '__main__':
             time_a,beat_a,chord_a = song.chord_transposed[i]
             time_b,beat_b,chord_b = song.chord_transposed[i+1]
             if not chord_a == "N" and not chord_b == "N":
-                label = find_section_label(float(time_a),sections)
+                label = find_section_label(float(time_b),sections)
+                if not label: continue
                 if not label in FREQ:
                     FREQ[label] = 0
                 #print(time_a,sections[0]["label"])
-                if label == "chorus":
-                    plot.addChordTransition(chord_a, chord_b, SECTION_COLOR[label])
+                #if label == "verse":
+                plot.addChordTransition(chord_a, chord_b, SECTION_COLOR[label])
                 FREQ[label] +=1
     print(FREQ)
     plot.showPlot()
