@@ -34,7 +34,7 @@ class Song:
             self.chord_transposed = self.chord
         else:
             self.chord_transposed = feature.transposeBeatAlignedChordLabels(self.chord, self.transpose_amount)
-        self.section = section.extractSongSection(file)
+        if file: self.section = section.extractSongSection(file)
         #self.section = []
         # calculate chord summary patterns
         self.chord_pattern = pattern.summaryChordPattern(self.chord_transposed)
@@ -128,7 +128,9 @@ class Song:
             chord_pattern = [json.loads(pat.decode('utf-8')) for pat in g_pattern['chord_pattern'][:]]
 
             g_section = f['section']
-            section = [sec.decode('utf-8') for sec in g_section['section_label'][:]]
+
+            #section = [sec.decode('utf-8') for sec in g_section['section_label'][:]]
+            section = [json.loads(sec) for sec in g_section['section_label'][:].astype(str).tolist()]
 
         # creates a new song instance
         song = cls(id=id, file=None, title=title, artist=artist, key=key, mode=mode, tempo=None)
