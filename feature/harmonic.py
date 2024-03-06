@@ -1,60 +1,80 @@
 import numpy as np
-import math
-import matplotlib.pyplot as plt
 
-# def lcm(a, b):
-#     """Calculate the least common multiple of two numbers."""
-#     return abs(a * b) // math.gcd(int(a), int(b))
 
-def multiples(x,time):
-    n = []
-    for i in range(1,time):
-        n.append(x*i)
-    return np.array(n)
+def note_frequency(note, octave):
+    # Mapping of note names to their semitone distances from A in the same octave
+    note_semitones = {
+        'C': -9, 'C#': -8, 'Db': -8, 'D': -7, 'D#': -6, 'Eb': -6,
+        'E': -5, 'F': -4, 'F#': -3, 'Gb': -3, 'G': -2, 'G#': -1, 'Ab': -1,
+        'A': 0, 'A#': 1, 'Bb': 1, 'B': 2
+    }
 
-def get_note_frequency(note_label,tune = 440.0):
-    A4_freq = tune
-    notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-    note_position = notes.index(note_label) - 9
-    frequency = A4_freq * (2 ** (note_position / 12))
+    # Calculate the semitone distance from A4
+    semitone_distance_from_A4 = note_semitones[note] + 12 * (octave - 4)
+
+    # Frequency of A4
+    A4_freq = 440
+
+    # Calculate the frequency using the formula for equal temperament tuning
+    frequency = A4_freq * (2 ** (semitone_distance_from_A4 / 12))
+
     return frequency
 
-def get_common_subharmonic_period(chord):
-    # test
-    f_c = get_note_frequency("C")
-    f_e = get_note_frequency("E")
-    f_g = get_note_frequency("G")
 
-    # compute periods
-    t_c = 1/f_c
-    t_e = 1/f_e
-    t_g = 1/f_g
+def find_harmonic_tension(frequencies, fs=44100, duration=1, n_samples=2000):
+    """
+    Plots any number of notes based on their frequencies, focusing on zero crossings from negative to positive,
+    and identifies the region where these specific crossings are most closely in phase.
 
-    # find multiples of each notes
-    m_c = multiples(t_c,10)
-    m_e = multiples(t_e,10)
-    m_g = multiples(t_g,10)
+    :param frequencies: List of frequencies for the notes to be plotted.
+    :param fs: Sampling frequency in Hz.
+    :param duration: Duration of the signals in seconds.
+    :param n_samples: Number of samples to show in the plot.
+    """
+    t = np.linspace(0, duration, int(fs * duration), endpoint=False)  # Generate time array
 
-    print(m_c,m_e,m_g)
+    def find_zero_crossings_neg_to_pos(y):
+        crossings = np.where(np.diff(np.sign(y)) > 0)[0]
+        return crossings[crossings < n_samples]
 
-def find_common_subharmonic_periods(chord_notes, tune=440.0):
-    Scale = 10000
-    frequencies = [get_note_frequency(note, tune) for note in chord_notes]
-    # Calculate periods from the given frequencies
-    periods = [1 / freq for freq in frequencies]
-    print(periods)
-    # Convert periods to scaled integers
-    scaled_periods = [int(period * Scale) for period in periods]
+    zero_crossing_times = []
+    colors = ['red', 'green', 'blue', 'purple', 'orange', 'brown', 'pink', 'grey', 'olive', 'cyan']
+    combined_signal = np.zeros_like(t)
 
-    # Calculate the LCM of scaled periods
-    common_period_scaled = np.lcm.reduce(scaled_periods)
+    for i, freq in enumerate(frequencies):
+        note_signal = np.cos(2 * np.pi * freq * t)
+        combined_signal += note_signal
+        adj_zero_crossings = find_zero_crossings_neg_to_pos(note_signal)
+        zero_crossing_times.append(t[adj_zero_crossings])
 
-    # Convert the common period back to its original scale
-    common_period = common_period_scaled / Scale
 
-    return common_period
+
+    # Combine and plot the overall signal
+    adj_zero_crossings_combined = find_zero_crossings_neg_to_pos(combined_signal)
+
+
+    # Find minimal delta t where specific crossings are closely in phase
+    from itertools import product
+    delta_ts = []
+    alignment_times = []
+
+    for zc_combination in product(*zero_crossing_times):
+        max_time = max(zc_combination)
+        min_time = min(zc_combination)
+        delta_t = max_time - min_time
+        delta_ts.append(delta_t)
+        alignment_times.append((min_time, max_time))
+
+    min_delta_t_index = np.argmin(delta_ts)
+    min_delta_t = delta_ts[min_delta_t_index]
+    alignment_time = alignment_times[min_delta_t_index]
+
+
+    tension = alignment_time[1] - alignment_time[0]
+    return tension
 
 if __name__ == '__main__':
-    chord_notes = ["C", "E", "G"]
-    common_period = find_common_subharmonic_periods(chord_notes)
+    chord_notes = [note_frequency("C",4), note_frequency("E",4), note_frequency("G",4)]
+    tension = common_period = find_harmonic_tension(chord_notes)
+    print(tension)
     print(f"The common subharmonic period for the C Major chord is: {common_period} seconds")

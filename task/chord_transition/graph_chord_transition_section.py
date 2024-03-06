@@ -24,7 +24,7 @@ def find_section_label(time,s):
 
 
 if __name__ == '__main__':
-    TARGET_MODE = "minor"
+    TARGET_MODE = "major"
     PATH = "/Users/nurupo/Desktop/dev/music4all/europe/"
     # loop all folder
     song_collections = []
@@ -51,8 +51,8 @@ if __name__ == '__main__':
                 if not label in FREQ:
                     FREQ[label] = 0
                 #print(time_a,sections[0]["label"])
-                #if label == "verse":
-                plot.addChordTransition(chord_a, chord_b, SECTION_COLOR[label])
+                if label == "bridge":
+                    plot.addChordTransition(chord_a, chord_b, SECTION_COLOR[label])
                 FREQ[label] +=1
     print(FREQ)
     plot.showPlot()

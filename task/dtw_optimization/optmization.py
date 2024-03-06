@@ -1,35 +1,12 @@
 from feature import extract as feature
 from tslearn.metrics import dtw_path,dtw
-
-def extractChangeChordPattern(chordsArray):
-    if not chordsArray: return []
-    current_name = None
-    chord_vaild_ls = []
-    chord_time_ls = []
-    chord_beat_ls = []
-    for c in chordsArray:
-        time, beat, chord = c
-        if chord == "N" or chord == None: continue
-        if chord == current_name: continue
-
-        chord_vaild_ls.append(chord)
-        chord_time_ls.append(time)
-        chord_beat_ls.append(time)
-
-        current_name = chord
-    chord_sequence = {
-        'valid_sequence':chord_vaild_ls,
-        'time':chord_time_ls,
-        "beat":chord_beat_ls
-    }
-    return chord_sequence
-
-def summaryChordPattern(chordsArray):
+from model.song import *
+def summaryChordPattern(chordsArray,WINDOW = 16):
     if not chordsArray: return []
     print("Extracting Summary Chord Pattern ...")
 
     START_ON_DOWNBEAT = True  # Set algorithm to only start search on chord that is on downbeat
-    WINDOW = 16  # measures for chord progession length
+    #WINDOW = 16  # measures for chord progession length
     HOP_SIZE = 1  # Hop size of 1 allows overlapping windows
     matched_patterns = {}
     used_patterns = set()  # Set to keep track of unique patterns already used in a match
@@ -88,7 +65,7 @@ def summaryChordPattern(chordsArray):
                 cost = cost / path_length
 
                 if cost < cost_threshold:
-                    #print(cost)
+                    print(cost)
                     matched_patterns[pattern_key]['matches'].append({
                         'start_search': j,
                         'end_search': j + WINDOW - 1
@@ -107,7 +84,6 @@ def summaryChordPattern(chordsArray):
         i += HOP_SIZE  # Move to the next position
 
     # Print All Found Matches
-
     output = []
     for pattern, details in matched_patterns.items():
         if len(details['matches']) > 0:
@@ -119,3 +95,8 @@ def summaryChordPattern(chordsArray):
     #pattern_freq = {pattern: len(details['matches']) for pattern, details in matched_patterns.items() if len(details['matches']) > 0}
 
     return output
+
+if __name__ == '__main__':
+    song = Song.from_h5('/Users/nurupo/Desktop/dev/music4all/europe/The Final Countdown [NNiTxUEnmKI].h5')
+    result = summaryChordPattern(song.chord)
+    
