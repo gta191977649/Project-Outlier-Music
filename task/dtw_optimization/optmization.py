@@ -183,11 +183,7 @@ def detect_ending_cadence(chord_progression,mode="major"):
 if __name__ == '__main__':
     song = Song.from_h5('/Users/nurupo/Desktop/dev/music4all/europe/The Final Countdown [NNiTxUEnmKI].h5')
 
-
-
-
     result = summaryChordPattern(song.chord_transposed,WINDOW=16)
-
     print("_________")
     overall = 0
     for pat in result:

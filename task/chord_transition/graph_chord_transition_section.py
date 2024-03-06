@@ -5,10 +5,10 @@ from plot.chord_transition_plot import *
 SECTION_COLOR = {
     "intro":"tab:purple",
     "verse":"blue",
-    "solo":"tab:orange",
+    "solo":"tab:green",
     "bridge":"tab:brown",
     "end":"black",
-    "outro":"tab:pink",
+    "outro":"tab:green",
     "chorus":"red",
     "inst":"tab:pink",
     "start":"tab:pink",
@@ -25,7 +25,7 @@ def find_section_label(time,s):
 
 if __name__ == '__main__':
     TARGET_MODE = "major"
-    PATH = "/Users/nurupo/Desktop/dev/music4all/europe/"
+    PATH = "/Users/nurupo/Desktop/dev/music4all/akb48/wav"
     # loop all folder
     song_collections = []
     for root, dirs, files in os.walk(PATH):
@@ -51,8 +51,8 @@ if __name__ == '__main__':
                 if not label in FREQ:
                     FREQ[label] = 0
                 #print(time_a,sections[0]["label"])
-                if label == "bridge":
-                    plot.addChordTransition(chord_a, chord_b, SECTION_COLOR[label])
+                #if label == "bridge":
+                plot.addChordTransition(chord_a, chord_b, SECTION_COLOR[label])
                 FREQ[label] +=1
     print(FREQ)
     plot.showPlot()
