@@ -1,4 +1,4 @@
-from feature import extract as feature
+from feature.analysis import *
 from model.harmonic import *
 from tslearn.metrics import dtw_path,dtw
 from model.song import *
@@ -155,31 +155,47 @@ def summaryChordPattern(chordsArray,WINDOW = 16):
     return output
 
 
-def detect_ending_cadence(chord_progression):
-    ending_cadences_major = {
-        ["V","I"]: 4,   # "Authentic (Perfect) Cadence"
-        ["IV","I"]:3,   #"Plagal Cadence"
-        ["*","V"]: 1,   #"Half Cadence"
-        ["V","vi"]:2,   #"Deceptive (Interrupted) Cadence"
-    }
+def detect_ending_cadence(chord_progression,mode="major"):
+    ending_cadences_major = [
+        ["V","I",4],   # "Authentic (Perfect) Cadence"
+        ["IV","I",3],   #"Plagal Cadence"
+        ["*","V",1],   #"Half Cadence"
+        ["V","vi",2],   #"Deceptive (Interrupted) Cadence"
+    ]
 
-    ending_cadences_minor = {
-        ["V", "i"]: 4,  #"Authentic (Perfect) Cadence",
-        ["iv", "i"]:3,  #"Plagal Cadence",
-        ["*", "V"]: 1,  #"Half Cadence",
-        ["V", "VI"]:2,  #"Deceptive (Interrupted) Cadence",
-    }
+    ending_cadences_minor = [
+        ["V", "i",4], #"Authentic (Perfect) Cadence",
+        ["iv", "i",3], #"Plagal Cadence",
+        ["*", "V",1], #"Half Cadence",
+        ["V", "VI",2]  #"Deceptive (Interrupted) Cadence",
+    ]
+    ending_cadences = mode == "major" and ending_cadences_major or ending_cadences_minor
 
-
+    #process progression
+    print(chord_progression)
+    chord_progression_processed = []
+    current = None
+    for chord in chord_progression:
+        if not chord == current:
+            chord_progression_processed.append(chord)
+            current = chord
+    print(chord_progression_processed)
 if __name__ == '__main__':
     song = Song.from_h5('/Users/nurupo/Desktop/dev/music4all/europe/The Final Countdown [NNiTxUEnmKI].h5')
 
+
+
+
     result = summaryChordPattern(song.chord_transposed,WINDOW=16)
+
     print("_________")
     overall = 0
     for pat in result:
         progression = pat["pattern"]
-        roman_label = pat["roman_label"]
+        c,n_diatonic,count_non_diatonic = anlysisromanMumerals(progression,False)
+        c = list(c)
+        resolve = detect_ending_cadence(c,song.mode)
+        #print(resolve)
         tension = 0
         for chord in progression:
             harmonic = Harmonic(chord)
@@ -188,6 +204,10 @@ if __name__ == '__main__':
         overall = overall + tension
         print(tension)
     print(f"overall:{overall}")
-    #print(result)
+
+    # roman_label = pat["roman_label"]
+    # ca = detect_ending_cadence(roman_label, song.mode)
+    # print(ca)
+
     #c = Chord("Cmaj")
     #print(c.components())
