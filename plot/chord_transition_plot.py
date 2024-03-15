@@ -59,7 +59,6 @@ class ChordTransitionPlot:
             self.chord_node.add_node(key)
             self.node_colors.append(self.is_diatonic(key) and "lightgreen" or "lightgrey")
 
-        # Initialize positions for minor chords in the inner circle
         for i, key in enumerate(self.circle_of_fifths_minor):
             angle = 2 * np.pi * i / len(self.circle_of_fifths_minor)  # Evenly space nodes around the circle
             self.node_pos[key] = (self.node_inner_distance * np.cos(angle), self.node_inner_distance * np.sin(angle))
@@ -79,10 +78,8 @@ class ChordTransitionPlot:
 
     def is_diatonic(self,chord_name):
         mode = self.mode
-        # Diatonic chords in the key of C major
         diatonic_chords_C_major = ['Cmaj', 'Dmin', 'Emin', 'Fmaj', 'Gmaj', 'Amin', 'Bdim']
 
-        # Diatonic chords in the key of A minor (Natural Minor)
         diatonic_chords_A_minor = ['Amin', 'Bdim', 'Cmaj', 'Dmin', 'Emin', 'Fmaj', 'Gmaj']
 
         # Adjust for harmonic minor's V7 chord (E7 in A minor), making G#dim also diatonic in A minor for harmonic purposes
@@ -120,7 +117,7 @@ class ChordTransitionPlot:
         self.max_edge_alpha = 1
 
 
-        # Draw nodes
+
         nx.draw_networkx_nodes(self.chord_node, node_pos, node_color=self.node_colors, edgecolors='black', node_size=1800,node_shape="o")
         nx.draw_networkx_labels(self.chord_node, node_pos)
 
@@ -129,20 +126,16 @@ class ChordTransitionPlot:
                                node_shape="s")
         nx.draw_networkx_labels(self.chord_scale_label, self.label_pos)
 
-        # Determine min and max weights for normalization
         all_weights = [data['weight'] for _, _, data in self.chord_node.edges(data=True)]
         min_weight = min(all_weights)
         max_weight = max(all_weights)
-        weight_range = max_weight - min_weight if max_weight > min_weight else 1  # Prevent division by zero
+        weight_range = max_weight - min_weight if max_weight > min_weight else 1
 
-        # Draw edges with dynamic width and alpha based on weight
         for u, v, data in self.chord_node.edges(data=True):
             weight = data['weight']
             edge_color = data.get('color', 'blue')
-            # Normalize weight for visualization purposes
             norm_weight = (weight - min_weight) / weight_range
 
-            # Calculate width and alpha based on normalized weight
             width = self.min_edge_width + norm_weight * (self.max_edge_width - self.min_edge_width)
             alpha = self.min_edge_alpha + norm_weight * (self.max_edge_alpha - self.min_edge_alpha)
 
@@ -152,18 +145,20 @@ class ChordTransitionPlot:
         plt.title(self.title)
 
     def showPlot(self):
-        plt.figure(figsize=(8, 8))  # Set the figure size
+        plt.figure(figsize=(8, 8))
         self.draw_graph(self.node_pos)
         plt.tight_layout()
         plt.axis('off')
-        plt.gca().set_aspect('equal', adjustable='box')  # Keep the aspect ratio circular
+        plt.gca().set_aspect('equal', adjustable='box')
 
         # legend
         connection_weight_line = mlines.Line2D([], [], color='blue', marker='_', markersize=15,
-                                               label='Connection Weight')
+                                               label='Diatonic Transition')
 
         browwed_line = mlines.Line2D([], [], color='red', marker='_', markersize=15,
-                                               label='Connection (Contains Browwed Chords)')
+                                               label='Non Diatonic Transition')
+        yellow_line = mlines.Line2D([], [], color='tab:orange', marker='_', markersize=15,
+                                               label='Diatonic to Non')
 
         diatonic_chord_circle = mlines.Line2D([], [], color='white', marker='o', markerfacecolor='lightgreen',
                                               markersize=10, label='Diatonic Chord', linestyle='None')
@@ -171,7 +166,7 @@ class ChordTransitionPlot:
                                                  markersize=10, label='Non-Diatonic Chord', linestyle='None')
         chord_scale_square = mlines.Line2D([], [], color='white', marker='s', markerfacecolor='lightblue',
                                                  markersize=10, label='Chord Degrees', linestyle='None')
-        plt.legend(handles=[connection_weight_line, browwed_line,diatonic_chord_circle, nondiatonic_chord_circle,chord_scale_square], loc='best')
+        plt.legend(handles=[connection_weight_line, browwed_line,diatonic_chord_circle, yellow_line,nondiatonic_chord_circle,chord_scale_square], loc='best')
 
 
         plt.show()

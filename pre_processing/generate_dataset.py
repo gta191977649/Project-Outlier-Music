@@ -65,8 +65,23 @@ def generate_dataset(base_path, dataset="music4all"):
 
                 for result in results:
                     print(result)
+    if dataset == "custom":
+        audio_folder = "custom"
+        path_csv = os.path.join(base_path, "dataset.csv")
+
+        if os.path.exists(path_csv):
+            csv_index = pd.read_csv(path_csv)
+            items = [item for _, item in csv_index.iterrows()]
+            args = [(item, base_path, audio_folder) for item in items]  # Prepare arguments
+
+            with Pool(processes=os.cpu_count(), initializer=init_worker) as pool:
+                results = list(tqdm(pool.imap_unordered(process_song, args),
+                                    total=len(items), desc="Processing songs"))
+
+                for result in results:
+                    print(result)
 
 
 if __name__ == '__main__':
     PATH = "/home/nurupo/Desktop/dev/music4all"
-    generate_dataset(PATH, dataset="music4all")
+    generate_dataset(PATH, dataset="custom")

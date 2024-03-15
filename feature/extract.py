@@ -72,7 +72,7 @@ def extractBeatAlignedChordLabels(file):
     chords = decode(chroma)
     # detect beats
     beat_processor = RNNDownBeatProcessor()
-    beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[4], fps=100)
+    beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[3], fps=100)
     beats = beat_decoder(beat_processor(file))
     # get beat align chord
     chordsArray = []
@@ -95,6 +95,11 @@ def extractBeatAlignedChordLabels(file):
         chordsArray.append(chord)
     print(f"✅Beat Aligned Chord: {time.time() - t_s}")
     return chordsArray
+def transposeChordLabel(chord_label,transpose_amount):
+    chord_label = chord_label.replace(":","")
+    transposed_chord = Chord(chord_label)
+    transposed_chord.transpose(transpose_amount)
+    return str(transposed_chord)
 def transposeBeatAlignedChordLabels(chordsArray, transpose_amount, target_scale="C"):
     if not chordsArray: return
     print("Tranpose Beat Aligned Chord ...")

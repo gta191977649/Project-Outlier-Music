@@ -69,8 +69,18 @@ def anlysisromanMumerals(chords, is_major=True):
 
     return tuple(roman_numerals), non_diatonic_chords,count_non_diatonic
 
-
-from pychord import Chord
+def is_diatonic_chord( chord,mode="major"):
+    major_map = {
+        'Cmaj': 'I', 'Dmin': 'ii', 'Emin': 'iii', 'Fmaj': 'IV',
+        'Gmaj': 'V', 'Amin': 'vi', 'Bdim': 'vii°'
+    }
+    minor_map = {
+        'Amin': 'i', 'Bdim': 'ii°', 'Cmaj': 'III', 'Dmin': 'iv',
+        'Emin': 'v', 'Fmaj': 'VI', 'Gmaj': 'VII'
+    }
+    chord_map = major_map if mode =="major" else minor_map
+    roman_label = chord_map.get(chord)
+    return not roman_label is None
 
 def chord_in_list(chord, chords_list):
     return chord in chords_list

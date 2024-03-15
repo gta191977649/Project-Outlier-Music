@@ -49,14 +49,14 @@ def plot_notes_in_phase(frequencies, fs=44100, duration=1, n_samples=2000):
         zero_crossing_times.append(t[adj_zero_crossings])
 
         # Plot note
-        plt.plot(t[0:n_samples], note_signal[0:n_samples], label=f'Note {i + 1} (Cosine)',
+        plt.plot(t[0:n_samples], note_signal[0:n_samples], label=f'Note {i + 1}',
                  color=colors[i % len(colors)])
         plt.scatter(t[adj_zero_crossings], note_signal[adj_zero_crossings], color=colors[i % len(colors)], s=10,
                     zorder=5)
 
     # Combine and plot the overall signal
     adj_zero_crossings_combined = find_zero_crossings_neg_to_pos(combined_signal)
-    plt.plot(t[0:n_samples], combined_signal[0:n_samples], label='Combined Notes (Cosine)', linestyle='--',
+    plt.plot(t[0:n_samples], combined_signal[0:n_samples], label='Combined Notes', linestyle='--',
              color='grey')
     plt.scatter(t[adj_zero_crossings_combined], combined_signal[adj_zero_crossings_combined], color='black', s=10,
                 zorder=5)
@@ -90,7 +90,7 @@ def plot_notes_in_phase(frequencies, fs=44100, duration=1, n_samples=2000):
     plt.show()
 
 # Example usage with three notes C, E, G
-chord_notes = [note_frequency("C",1), note_frequency("E",4), note_frequency("G",4)]
+chord_notes = [note_frequency("C",4), note_frequency("E",4), note_frequency("G",4)]
 
 plot_notes_in_phase(chord_notes)
 

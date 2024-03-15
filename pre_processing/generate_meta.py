@@ -2,7 +2,7 @@ import os
 from model.song import Song
 
 if __name__ == '__main__':
-    PATH = "/home/nurupo/Desktop/dev/music4all/europe_aud"
+    PATH = "/Users/nurupo/Desktop/dev/music4all/custom"
     # loop all folder
     for root, dirs, files in os.walk(PATH):
         for file in files:

@@ -1,7 +1,8 @@
 import numpy as np
+import numpy as np
+from scipy.fft import fft, fftfreq
 
-
-def note_frequency(note, octave):
+def note_frequency(note, octave=4):
     # Mapping of note names to their semitone distances from A in the same octave
     note_semitones = {
         'C': -9, 'C#': -8, 'Db': -8, 'D': -7, 'D#': -6, 'Eb': -6,
@@ -71,7 +72,44 @@ def find_harmonic_tension(frequencies, fs=44100, duration=1, n_samples=2000):
 
 
     tension = alignment_time[1] - alignment_time[0]
-    return tension
+    return tension,alignment_time,combined_signal
+
+def find_combined_signal_frequency(combined_signal, fs=44100):
+    """
+    Computes the frequency spectrum of the combined signal and identifies the dominant frequency.
+
+    :param combined_signal: The combined signal of the chord.
+    :param fs: Sampling frequency in Hz.
+    :return: Dominant frequency in the combined signal.
+    """
+    # Compute the FFT of the combined signal
+    signal_fft = fft(combined_signal)
+    signal_freq = fftfreq(len(combined_signal), 1/fs)
+
+    # Compute magnitude spectrum and find the index of the maximum magnitude
+    magnitude_spectrum = np.abs(signal_fft)
+    dominant_freq_index = np.argmax(magnitude_spectrum[:len(combined_signal)//2])
+
+    return signal_freq[dominant_freq_index]
+
+def adjust_notes_octave(chord_notes):
+    note_semitones = {
+        'C': -9, 'C#': -8, 'Db': -8, 'D': -7, 'D#': -6, 'Eb': -6,
+        'E': -5, 'F': -4, 'F#': -3, 'Gb': -3, 'G': -2, 'G#': -1, 'Ab': -1,
+        'A': 0, 'A#': 1, 'Bb': 1, 'B': 2
+    }
+    adjusted_notes = [chord_notes[0] + '4']  # Assuming the root note is in the 4th octave
+    for note in chord_notes[1:]:
+        # Determine the semitone distance from the root note to adjust octave as needed
+        root_semitone = note_semitones[chord_notes[0]]
+        note_semitone = note_semitones[note]
+        octave_adjustment = 4 + (1 if note_semitone < root_semitone else 0)
+        adjusted_note = note + str(octave_adjustment)
+        adjusted_notes.append(adjusted_note)
+    return adjusted_notes
+
+#calculates the stationary subharmonic tension (Δt) of a chord.
+
 
 if __name__ == '__main__':
     chord_notes = [note_frequency("C",4), note_frequency("E",4), note_frequency("G",4)]

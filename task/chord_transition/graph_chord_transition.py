@@ -37,20 +37,3 @@ if __name__ == '__main__':
                     plot.addChordTransition(a, b, "blue")
 
     plot.showPlot()
-
-    # progression = ["C", "Dm", "Eb", "F", "G", "Am", "Bdim"]
-    #
-    # plot = ChordTransitionPlot("Test",mode="major")
-    #
-    # for i in range(0,len(progression)-1):
-    #     a = progression[i]
-    #     b = progression[i+1]
-    #
-    #     print(Chord(a).components())
-    #     print(Chord(b).components())
-    #     #plot.addChordTransition(str(a),str(b))
-
-    #plot.showPlot()
-
-    # b = identify_borrowed_chords(song.chord_pattern[0]["pattern"],"major")
-    # print(b)

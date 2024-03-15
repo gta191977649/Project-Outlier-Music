@@ -137,7 +137,7 @@ class Song:
         song.album = album
         song.tempo = tempo
         song.release = release
-        song.transpose_amount = transpose_amount
+        song.transpose_amount = int(transpose_amount)
         song.chord = chord_original
         song.chord_transposed = chord_transposed
         song.chord_change = chord_changes_json

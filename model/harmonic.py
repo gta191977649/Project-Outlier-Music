@@ -6,4 +6,4 @@ class Harmonic:
         self.chord = Chord(chord_name)
         self.chord_notes = self.chord.components()
         self.chord_frequencies = [note_frequency(note,4) for note in self.chord_notes]
-        self.tension = find_harmonic_tension(self.chord_frequencies)
+        self.tension,self.alignment_times,self.chord_signal = find_harmonic_tension(self.chord_frequencies)
