@@ -112,10 +112,10 @@ if __name__ == '__main__':
                           song_outliers],
     })
 
-    df_outliers.to_csv("/Users/nurupo/Desktop/dev/music4all/outlier/non_diatonic.csv", index=False)
+    df_outliers.to_csv("/Users/nurupo/Desktop/dev/music4all/non_diatonic.csv", index=False)
 
     print(df_outliers)
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(6, 5))
     gs = GridSpec(2, 1, height_ratios=[3, 1])
 
     # Scatter Plot on top
@@ -135,7 +135,6 @@ if __name__ == '__main__':
     ax_kde.set_xlabel('Number of Non-Diatonic Chords')
     ax_kde.set_ylabel('Density')
     ax_kde.set_title('Kernel Density Estimate Plot of Non-Diatonic Chords')
-
 
     plt.tight_layout()
     plt.show()

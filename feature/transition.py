@@ -17,8 +17,11 @@ def compute_transition_resolution(chord_a_label,chord_b_label):
     adjusted_chord_p_notes = adjust_notes_octave(chord_p.components())
     adjusted_chord_s_notes = adjust_notes_octave(chord_s.components())
     # Get frequencies for adjusted chord notes
-    chord_freq_p = [note_frequency(note[:-1], int(note[-1])) for note in adjusted_chord_p_notes]
-    chord_freq_s = [note_frequency(note[:-1], int(note[-1])) for note in adjusted_chord_s_notes]
+    #chord_freq_p = [note_frequency(note[:-1], int(note[-1])) for note in adjusted_chord_p_notes]
+    #chord_freq_s = [note_frequency(note[:-1], int(note[-1])) for note in adjusted_chord_s_notes]
+    chord_freq_p = np.array([note_frequency(note[:-1], int(note[-1])) for note in adjusted_chord_p_notes])
+    chord_freq_s = np.array([note_frequency(note[:-1], int(note[-1])) for note in adjusted_chord_s_notes])
+
 
     # print(chord_freq_p)
     # print("====")
@@ -50,15 +53,20 @@ def compute_transition_resolution(chord_a_label,chord_b_label):
         chord_s_freq = find_combined_signal_frequency(chord_s_signal, fs=44100)
 
         ddt = chord_p_tension - chord_s_tension
-        T_sub = 1 / chord_s_freq
+        # for computational simplicity, redefine it as the mean of ki,ti across all notes of the chord
+        #T_sub = 1 / chord_s_freq
+        T_sub = np.mean(1 / chord_freq_s * (j + 1))
+
         dt_s = chord_s_tension
 
         if dt_s < (1 / 2) * T_sub:  # Condition to include the interaction in the calculation
             ddt_hat = ddt / T_sub
             sum_terms += (ddt_hat / (dt_s * T_sub)) ** c
+
     # Final calculation of the overall measure of Transitional Harmony
     if N > 0:  # Prevent division by zero
         overall_transitional_harmony = (sum_terms / N) ** (1 / c)
+
     else:
         overall_transitional_harmony = 0
     return overall_transitional_harmony

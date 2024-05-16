@@ -1,18 +1,17 @@
+import numpy as np
 
 from feature.analysis import *
 from feature.transition import *
 from model.harmonic import *
 from tslearn.metrics import dtw_path, dtw
 from model.song import *
-from pychord import Chord
-import matplotlib.pyplot as plt
-from sklearn import preprocessing
-import statistics
-from scipy.optimize import minimize_scalar
+import pandas as pd
 import os
+import matplotlib.pyplot as plt
+
 def summaryChordPattern(chordsArray, WINDOW=16):
     if not chordsArray: return []
-    print("Extracting Summary Chord Pattern ...")
+    #print("Extracting Summary Chord Pattern ...")
 
     START_ON_DOWNBEAT = True  # Set algorithm to only start search on chord that is on downbeat
     # WINDOW = 16  # measures for chord progession length
@@ -152,58 +151,48 @@ def evaluate_ending_cadence_score(chord_progression, mode="major"):
     return overall_score
 
 
-def evaluate_harmonic_resolve_score(chord_progression, mode="major"):
-    progression = filterRepeatedChords(chord_progression)
-    overall_tension = 0
-    for chord in progression:
-        harmonic = Harmonic(chord)
-        overall_tension += harmonic.tension * 1000
-
-    return overall_tension
-
 def evaluate_transition_resolve_score(chord_progression):
     #progression = filterRepeatedChords(chord_progression)
     progression = filterRepeatedChords(chord_progression)
 
     #print(progression)
     scores = []
-    overall_score = 0
     for i in range(len(progression)-1):
         s = compute_transition_resolution(progression[i], progression[i+1])
+        if s < 0: #when detect reosolve
+            scores.append(abs(s))
 
-        scores.append(s)
-        overall_score += abs(s)
-    #normalized_arr = preprocessing.normalize(np.array(scores))
+    scores = np.array(scores)
+    return np.sum(scores)
 
-
-    return overall_score
 def evaluate_ending_transition_resolve_score(chord_progression):
     progression = filterRepeatedChords(chord_progression)
     if len(progression) < 2:
-        print("Detect Chord progression is less 2 units!")
+        #print("Detect Chord progression is less 2 units!")
         return 0
     progression = progression[-2:]
 
     score = compute_transition_resolution(progression[0], progression[1])
-    print(progression,score)
+    #print(progression,score)
     if score > 0: # means no reolve
         return 0
 
-    return 1/abs(score)
-def evaluate_completeness_score(window_size, song, return_negative=False):
-    # Assuming necessary imports and functions such as `summaryChordPattern`,
-    # `filterRepeatedChords`, and scoring functions are defined above this function.
-    window_size = int(round(window_size))  # Ensure window size is an integer
+    return abs(score)
+def evaluate_completeness_score(window_size, song):
+
     result = summaryChordPattern(song.chord_transposed, WINDOW=window_size)
-    overall = 0
+    scores = []
     for pat in result:
         progression = pat["pattern"]
         c, n_diatonic, count_non_diatonic = anlysisromanMumerals(progression, song.mode == "major")
-        cadence = evaluate_ending_cadence_score(c, song.mode)
+        #cadence = evaluate_ending_cadence_score(c, song.mode)
 
         transition = evaluate_ending_transition_resolve_score(progression)
-        overall += transition + cadence
-    return -overall if return_negative else overall  # Minimize negative for maximization
+        #transition = evaluate_transition_resolve_score(progression)
+        scores.append(transition)
+
+    scores = np.array(scores)
+    return np.sum(scores)
 
 def evaluate_window_size(window_sizes, song):
     # Initialize variables to track the best window size and its score
@@ -226,25 +215,52 @@ def evaluate_window_size(window_sizes, song):
 if __name__ == '__main__':
     window_sizes = [3, 4, 6, 8, 9, 12, 16, 24, 32, 36, 64]
 
-    TARGET_MODE = "major"
-    PATH = "/Users/nurupo/Desktop/dev/music4all/akb48/"
-    # loop all folder
+
+    PATH = "/Users/nurupo/Desktop/dev/music4all/"
+    audio_folder = "audios"
+    path_csv = os.path.join(PATH, "stratified_songs_pop.csv")
+
     song_collections = []
-    for root, dirs, files in os.walk(PATH):
-        for file in files:
-            if file.endswith(".h5"):
-                filepath = os.path.join(root, file)
-                filename = os.path.splitext(file)[0]
-                song = Song.from_h5(filepath)
-                if song.mode == TARGET_MODE:
-                    song_collections.append(song)
 
+    if os.path.exists(path_csv):
+        csv = pd.read_csv(path_csv)
+        for _, item in csv.iterrows():
+            id = item['id']
+            h5_path = os.path.join(PATH, audio_folder, id + ".h5")
+            song = Song.from_h5(h5_path)
+            song_collections.append(song)
 
+    # PATH = "/Users/nurupo/Desktop/dev/music4all/akb48/"
+    # # loop all folder
+    # song_collections = []
+    # for root, dirs, files in os.walk(PATH):
+    #     for file in files:
+    #         if file.endswith(".h5"):
+    #             filepath = os.path.join(root, file)
+    #             filename = os.path.splitext(file)[0]
+    #             song = Song.from_h5(filepath)
+    #             if song.mode == "major":
+    #                 song_collections.append(song)
 
+    data = []
 
-    optimal_windowsizes = []
-    for song in song_collections:
-        best_window_size, max_score = evaluate_window_size(window_sizes, song)
-        print(f"Best window size: {best_window_size}, Max score: {max_score}")
-        optimal_windowsizes.append(best_window_size)
-    print(optimal_windowsizes)
+    for size in window_sizes:
+        print(size)
+        score_for_window = []
+        for song in song_collections:
+            score = evaluate_completeness_score(size, song)
+            score_for_window.append(score)
+        data.append(score_for_window)
+
+    # Plotting
+    fig, ax = plt.subplots(figsize=(10, 7))
+    # Adding titles and labels
+    ax.set_title('Scores for Different Window Sizes')
+    ax.set_xlabel('Window Size')
+    ax.set_ylabel('Score')
+
+    # Creating box plot
+    ax.boxplot(data, labels=[str(w) for w in window_sizes], patch_artist=True)
+
+    plt.show()
+    print(data)

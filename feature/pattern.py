@@ -1,6 +1,45 @@
 from feature import extract as feature
 from tslearn.metrics import dtw_path,dtw
+import matplotlib.pyplot as plt
+from metric.tpsd.tps_comparison import TpsComparison
+def to_harte_label(chord):
+    # Check if the chord is already in Harte format
+    if any(suffix in chord for suffix in [':maj', ':min', ':dim', ':aug']):
+        return chord
+    # Replace chord suffixes with Harte format
+    chord = chord.replace('maj', ':maj').replace('min', ':min').replace('dim', ':dim').replace('aug', ':aug')
+    return chord
 
+# This methods implements de Berardinis et al.(2023)
+# The Harmonic Memory: a Knowledge Graph of harmonic paterns as a trustworthy framework for computational creativity
+def extractTontalPitchDistancePattern(chordsArray,key='C:maj',mode="offset"):
+    if not chordsArray: return []
+    tpsd_singal = []
+    for i in range(0, len(chordsArray) - 1):
+        if chordsArray[i] == "N" or chordsArray[i + 1] == "N": continue
+        a = to_harte_label(chordsArray[i])
+        b = to_harte_label(chordsArray[i + 1]) if mode == "offset" else to_harte_label(key)
+        tpsd = TpsComparison(chord_a=a, chord_b=b, key_a=key, key_b=key)
+        tpsd_singal.append(tpsd.get_tpsd_distance())
+    return tpsd_singal
+
+# implements Hua Cui Kan's 色彩和声 Vector Model
+def extractChromaticPattern(chordsArray):
+    if not chordsArray: return []
+    chromatic_singal = []
+    for i in range(0, len(chordsArray)):
+        if chordsArray[i] == "N":
+            chromatic_singal.append(0)
+            continue
+
+        angle = feature.getChordVectorsAngleFromChord(chordsArray[i])
+        chromatic_singal.append(angle)
+    return chromatic_singal
+def computeTPSD(a,b,key='C:maj'):
+    a = to_harte_label(a)
+    b = to_harte_label(b)
+    tpsd = TpsComparison(chord_a=a, chord_b=b, key_a=key, key_b=key)
+    return tpsd.get_tpsd_distance()
 def extractChangeChordPattern(chordsArray):
     if not chordsArray: return []
     current_name = None
@@ -24,12 +63,12 @@ def extractChangeChordPattern(chordsArray):
     }
     return chord_sequence
 
-def summaryChordPattern(chordsArray):
+def summaryChordPattern(chordsArray,window = 16):
     if not chordsArray: return []
     print("Extracting Summary Chord Pattern ...")
 
     START_ON_DOWNBEAT = True  # Set algorithm to only start search on chord that is on downbeat
-    WINDOW = 16  # measures for chord progession length
+    WINDOW = window  # measures for chord progession length
     HOP_SIZE = 1  # Hop size of 1 allows overlapping windows
     matched_patterns = {}
     used_patterns = set()  # Set to keep track of unique patterns already used in a match

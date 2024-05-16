@@ -44,13 +44,12 @@ def getChordVectorsAngleFromChords(chordsArray):
     for c in chordsArray:
         time, beat, chord = c
         if chord == "N":  # Skip None Chord
-            new_chord = (time, beat, "N")
             angles.append(0)
             continue
         chord = chord.replace(":", "")
         c = Chord(chord)
         notes = c.components()
-        angle = map_vector(notes,chord)
+        angle = map_vector(notes,chord).temp_theta
         angles.append(angle)
     return angles
 def getChordVectorsAngleFromChord(chord):

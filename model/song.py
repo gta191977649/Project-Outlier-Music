@@ -29,13 +29,14 @@ class Song:
         # Calculate transpose amount
         self.transpose_amount = feature.calculate_transpose_amount(self.key, self.mode)
         self.chord_transposed = []
+
         if file and self.transpose_amount == 0:
             print(f"Skip transpose for {title}, since it's already on standard!")
             self.chord_transposed = self.chord
         else:
             self.chord_transposed = feature.transposeBeatAlignedChordLabels(self.chord, self.transpose_amount)
-        if file: self.section = section.extractSongSection(file)
-        #self.section = []
+        #if file: self.section = section.extractSongSection(file)
+        self.section = []
         # calculate chord summary patterns
         self.chord_pattern = pattern.summaryChordPattern(self.chord_transposed)
         self.chord_change = pattern.extractChangeChordPattern(self.chord_transposed)
@@ -144,5 +145,4 @@ class Song:
         song.chord_pattern = chord_pattern
         song.section = section
         return song
-
 
