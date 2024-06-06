@@ -87,7 +87,7 @@ if __name__ == '__main__':
             time_a, beat_a, chord_a = song.chord_transposed[i]
             time_b, beat_b, chord_b = song.chord_transposed[i + 1]
 
-            print(time_b)
+
             chord_a = chord_a.replace(":", "")
             chord_b = chord_b.replace(":", "")
             if is_transition_in_patterns(chord_a, chord_b, song.chord_pattern):

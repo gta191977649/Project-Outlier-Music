@@ -16,7 +16,7 @@ def extractTontalPitchDistancePattern(chordsArray,key='C:maj',mode="offset"):
     if not chordsArray: return []
     tpsd_singal = []
     for i in range(0, len(chordsArray) - 1):
-        if chordsArray[i] == "N" or chordsArray[i + 1] == "N": continue
+        if chordsArray[i] == 'N' or chordsArray[i + 1] == 'N': continue
         a = to_harte_label(chordsArray[i])
         b = to_harte_label(chordsArray[i + 1]) if mode == "offset" else to_harte_label(key)
         tpsd = TpsComparison(chord_a=a, chord_b=b, key_a=key, key_b=key)
@@ -146,7 +146,6 @@ def summaryChordPattern(chordsArray,window = 16):
         i += HOP_SIZE  # Move to the next position
 
     # Print All Found Matches
-
     output = []
     for pattern, details in matched_patterns.items():
         if len(details['matches']) > 0:
@@ -156,5 +155,4 @@ def summaryChordPattern(chordsArray,window = 16):
             })
            # print(pattern,len(details['matches']))
     #pattern_freq = {pattern: len(details['matches']) for pattern, details in matched_patterns.items() if len(details['matches']) > 0}
-
     return output

@@ -11,7 +11,7 @@ if __name__ == '__main__':
                 filename = os.path.splitext(file)[0]
                 print(f"START PROCESS:{filename}")
                 title = filename
-                artist = "europe"
+                artist = "Custom"
                 album = "N/A"
                 release = 2000
                 language = "en"

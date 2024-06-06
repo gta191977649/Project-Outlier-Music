@@ -17,6 +17,7 @@ from feature.pattern import extractTontalPitchDistancePattern,computeTPSD,extrac
 import scipy
 import librosa
 from scipy.ndimage import filters
+from tqdm import tqdm
 
 def to_harte_label(chord):
     chord = chord.replace('maj', ':maj').replace('min', ':min').replace('dim', ':dim').replace('aug', ':aug')
@@ -147,6 +148,8 @@ def plot_ssm_with_novelty(X_trans, S, f_novel):
     # Plot the novelty function
     ax2 = fig.add_subplot(gs[2, 0])
     ax2.plot(f_novel,color='b')
+    for peak in f_picks:
+        plt.axvline(x=peak, color='red', linestyle='dotted', linewidth=1,lw=2)
     ax2.set_title('Novelty Function')
     ax2.set_xlabel('Time (frames)')
     ax2.set_ylabel('Novelty')
@@ -156,19 +159,19 @@ def plot_ssm_with_novelty(X_trans, S, f_novel):
     plt.show()
 if __name__ == '__main__':
     TARGET_MODE = "major"
-    KEY = "B:maj"
 
-    PATH = "/Users/nurupo/Desktop/dev/music4all/akb48/君はメロディー [9Spu8vH0eUs].h5"
-
+    PATH = "/Users/nurupo/Desktop/dev/music4all/europe/Europe - The Final Countdown (Official Video) [9jK-NcRmVcw].h5"
+    AUDIO = "/Users/nurupo/Desktop/dev/music4all/mp3/Europe - The Final Countdown (Official Video).mp3"
     song = Song.from_h5(PATH)
     #song = Song(1, "/Users/nurupo/Desktop/dev/music4all/custom/MV君はメロディー Short ver.  AKB48[公式].h5", "Living On The Ceiling","Blancmange")
 
     chords = []
     for item in song.chord:
         _,_,chord = item
-        chords.append(chord)
+        if not chord == 'N': chords.append(chord)
 
-    signal = extractTontalPitchDistancePattern(chords, mode="profile",key=KEY)
+    key = f"{song.key}:{song.mode[:3]}"
+    signal = extractTontalPitchDistancePattern(chords, mode="profile",key=key)
     #signal = extractChromaticPattern(chords)
     N = len(chords)
     print(f"N is {N}")
@@ -183,9 +186,12 @@ if __name__ == '__main__':
     N = len(chords)
     S = np.zeros((N, N))
 
-    for n in range(0,S.shape[0]):
-        for m in range(0,S.shape[1]):
-            S[n,m] = 1 - (computeTPSD(chords[n],chords[m],key=KEY) / 13)
+    # for n in range(0,S.shape[0]):
+    #     for m in range(0,S.shape[1]):
+    #         S[n,m] = 1 - (computeTPSD(chords[n],chords[m],key=key) / 13)
+    for n in tqdm(range(S.shape[0]), desc="Compute TPSD Matrix..."):
+        for m in range(S.shape[1]):
+            S[n, m] = 1 - (computeTPSD(chords[n], chords[m], key=key) / 13)
 
     #Compute Novelty function
     f_novel = compute_novelty_ssm(S,L=20, exclude=True)
@@ -205,12 +211,22 @@ if __name__ == '__main__':
 
 
     plt.figure(figsize=(15, 3))
-    plt.step(range(len(signal)), signal, where='mid', color='b', linewidth=1.5)
+    plt.step(range(len(signal)), signal, where='mid', color='b', linewidth=2)
+    # for peak in f_picks:
+    #     plt.axvline(x=peak, color='red', linestyle='dotted', linewidth=1,lw=2)
     plt.xlim([0, len(signal)])
     # plt.title(format_chord_progression(chord_progression["pattern"]))
     plt.xlabel('Chord Index')
     plt.ylabel('Tonal Pitch Distance (TPSD)')
     plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+    plt.figure(figsize=(15, 3))
+    y, sr = librosa.load(AUDIO)
+    y_harm = librosa.effects.harmonic(y=y, margin=8)
+    chroma_cqt = librosa.feature.chroma_cqt(y=y_harm, sr=sr)
+    librosa.display.specshow(chroma_cqt, y_axis='chroma', x_axis='time')
     plt.tight_layout()
     plt.show()
     #for chord_progression in song.chord_pattern:

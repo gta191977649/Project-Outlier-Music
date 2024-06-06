@@ -71,7 +71,7 @@ def extractBeatAlignedChordLabels(file):
     chords = decode(chroma)
     # detect beats
     beat_processor = RNNDownBeatProcessor()
-    beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[3], fps=100)
+    beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[4], fps=100)
     beats = beat_decoder(beat_processor(file))
     # get beat align chord
     chordsArray = []
