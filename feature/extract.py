@@ -65,10 +65,16 @@ def extractBeatAlignedChordLabels(file):
     print("Extract Beat Aligned Chord ...")
     t_s = time.time()
     # detect chord
-    dcp = DeepChromaProcessor()
-    decode = DeepChromaChordRecognitionProcessor()
-    chroma = dcp(file)
-    chords = decode(chroma)
+    # dcp = DeepChromaProcessor()
+    # decode = DeepChromaChordRecognitionProcessor()
+    # chroma = dcp(file)
+    # chords = decode(chroma)
+    # Use CNN Model instead to improved latency
+    chord_processor = CNNChordFeatureProcessor()
+    chord_decoder = CRFChordRecognitionProcessor()
+    chords = chord_decoder(chord_processor(file))
+
+
     # detect beats
     beat_processor = RNNDownBeatProcessor()
     beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[4], fps=100)

@@ -33,7 +33,7 @@ if __name__ == '__main__':
                 release = 2000
                 language = "en"
                 tags = "rock,pop"
-                song = Song(id=title,key=keys[filename]["key"],mode=keys[filename]["mode"], file=filepath, title=title, artist=artist)
+                song = Song(id=title, file=filepath, title=title, artist=artist)
                 song.album = album
                 song.release = release
                 song.language = language

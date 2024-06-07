@@ -71,7 +71,7 @@ def plot_clusters(X_train, labels, centroids, k):
 def eval_silhouette_score(X):
     scores = []
     Sum_of_squared_distances = []
-    K = range(2, 10)
+    K = range(2, len(X)-1)
     for k in K:
         kmeans = MODEL(n_clusters=k, metric="dtw", random_state=0)
         km = kmeans.fit(X)
@@ -138,7 +138,7 @@ def normalize_to_max_length(X_train):
 if __name__ == '__main__':
     #TARGET_MODE = "major"
     TARGET_SECTION = "chorus"
-    PATH = "/Users/nurupo/Desktop/dev/music4all/custom"
+    PATH = "F:\\dataset\\custom"
     print(TARGET_SECTION)
     # loop all folder
 
@@ -191,9 +191,9 @@ if __name__ == '__main__':
     print(X_train)
     X_train = normalize_to_max_length(X_train)
     X_train = np.array(X_train)
-    #eval_silhouette_score(X_train)
+    eval_silhouette_score(X_train)
 
-    k =3
+    k =2
     kmeans = MODEL(n_clusters=k, metric="dtw", random_state=0)
     km = kmeans.fit(X_train)
     centroids = kmeans.cluster_centers_
