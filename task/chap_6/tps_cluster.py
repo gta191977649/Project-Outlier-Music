@@ -136,9 +136,9 @@ def normalize_to_max_length(X_train):
 
 
 if __name__ == '__main__':
-    TARGET_MODE = "major"
+    #TARGET_MODE = "major"
     TARGET_SECTION = "chorus"
-    PATH = "/Users/nurupo/Desktop/dev/music4all/akb48/"
+    PATH = "F:\\dataset\\custom"
     print(TARGET_SECTION)
     # loop all folder
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
                 filepath = os.path.join(root, file)
                 filename = os.path.splitext(file)[0]
                 song = Song.from_h5(filepath)
-                if song.mode == TARGET_MODE: song_collections.append(song)
+                song_collections.append(song)
 
     # Prepare pattern dataset
     X_train = []
@@ -180,6 +180,7 @@ if __name__ == '__main__':
         if len(chord_progression) < 3:
             print(chord_progression)
         key = f"{song.key}:{song.mode[:3]}"
+        print(key)
         signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
         # signal = patternFeature.extractChromaticPattern(chord_progression)
         # if len(signal) >0:
@@ -191,9 +192,9 @@ if __name__ == '__main__':
     print(X_train)
     X_train = normalize_to_max_length(X_train)
     X_train = np.array(X_train)
-    eval_silhouette_score(X_train)
+    #eval_silhouette_score(X_train)
 
-    k = 3
+    k =3
     kmeans = MODEL(n_clusters=k, metric="dtw", random_state=0)
     km = kmeans.fit(X_train)
     centroids = kmeans.cluster_centers_
