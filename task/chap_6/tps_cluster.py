@@ -138,7 +138,7 @@ def normalize_to_max_length(X_train):
 if __name__ == '__main__':
     #TARGET_MODE = "major"
     TARGET_SECTION = "chorus"
-    PATH = "F:\\dataset\\custom"
+    PATH = "/Users/nurupo/Desktop/dev/music4all/custom"
     print(TARGET_SECTION)
     # loop all folder
 
@@ -168,10 +168,7 @@ if __name__ == '__main__':
         for i in range(len(song.chord)):
             time, beat, chord = song.chord[i]
             chord = chord.replace(":", "")
-            # section_label = find_section_label(float(time), sections)
-            # if not section_label:
-            #     print("section is not fond!")
-            #     continue
+            # Todo: ensuring beat alinment is correct
             if isTimmingInSection(float(time), TARGET_SECTION, sections):
                 # if find_section_label(float(time), sections) == TARGET_SECTION: #if matched section is found
                 chord_progression.append(chord)
@@ -179,7 +176,9 @@ if __name__ == '__main__':
 
         if len(chord_progression) < 3:
             print(chord_progression)
-        key = f"{song.key}:{song.mode[:3]}"
+        #key = f"{song.key}:{song.mode[:3]}"
+        # NOPE! We should take the first key from chord progression as home key instead!
+        key = chord_progression[0]
         print(key)
         signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
         # signal = patternFeature.extractChromaticPattern(chord_progression)

@@ -15,12 +15,24 @@ def to_harte_label(chord):
 def extractTontalPitchDistancePattern(chordsArray,key='C:maj',mode="offset"):
     if not chordsArray: return []
     tpsd_singal = []
-    for i in range(0, len(chordsArray) - 1):
-        if chordsArray[i] == 'N' or chordsArray[i + 1] == 'N': continue
-        a = to_harte_label(chordsArray[i])
-        b = to_harte_label(chordsArray[i + 1]) if mode == "offset" else to_harte_label(key)
-        tpsd = TpsComparison(chord_a=a, chord_b=b, key_a=key, key_b=key)
-        tpsd_singal.append(tpsd.get_tpsd_distance())
+    if mode == "offset":
+        for i in range(0, len(chordsArray) - 1):
+            if chordsArray[i] == 'N' or chordsArray[i + 1] == 'N': continue
+            a = to_harte_label(chordsArray[i])
+            b = to_harte_label(chordsArray[i + 1])
+            tpd = TpsComparison(chord_a=a, chord_b=b, key_a=key, key_b=key)
+            tpsd_singal.append(tpd.get_tpsd_distance())
+
+    if mode == "profile":
+        for i in range(0, len(chordsArray)):
+            if chordsArray[i] == 'N' or key == 'N': continue
+            a = to_harte_label(chordsArray[i])
+            b = to_harte_label(key)
+            key = to_harte_label(key)
+
+            tpd = TpsComparison(chord_a=a, chord_b=b, key_a=key, key_b=key)
+            tpsd_singal.append(tpd.get_tpsd_distance())
+
     return tpsd_singal
 
 # implements Hua Cui Kan's 色彩和声 Vector Model
