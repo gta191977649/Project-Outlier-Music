@@ -138,6 +138,7 @@ def normalize_to_max_length(X_train):
 if __name__ == '__main__':
     #TARGET_MODE = "major"
     TARGET_SECTION = "chorus"
+    PROGRESSION_LENGTH = 4 #4 chords
     PATH = "F:\\dataset\\custom"
     print(TARGET_SECTION)
     # loop all folder
@@ -165,14 +166,17 @@ if __name__ == '__main__':
         sections = song.section
         chord_progression = []
         times = []
+        n_progression = 0
         for i in range(len(song.chord)):
             time, beat, chord = song.chord[i]
             chord = chord.replace(":", "")
+
             # Todo: ensuring beat alinment is correct
             if isTimmingInSection(float(time), TARGET_SECTION, sections):
-                # if find_section_label(float(time), sections) == TARGET_SECTION: #if matched section is found
-                chord_progression.append(chord)
-                times.append(time)
+                if float(beat) == 1.0 and n_progression < PROGRESSION_LENGTH:
+                    chord_progression.append(chord)
+                    times.append(time)
+                    n_progression+=1
 
         if len(chord_progression) < 3:
             print(chord_progression)
@@ -193,7 +197,7 @@ if __name__ == '__main__':
     X_train = np.array(X_train)
     eval_silhouette_score(X_train)
 
-    k =2
+    k =3
     kmeans = MODEL(n_clusters=k, metric="dtw", random_state=0)
     km = kmeans.fit(X_train)
     centroids = kmeans.cluster_centers_
@@ -206,7 +210,7 @@ if __name__ == '__main__':
         print(f"-------------------")
         for j in range(len(labels)):
             if labels[j] == i:
-                print(Y_songs[j], Y_chord_progressions[j])
+                print(Y_songs[j], X_train[j])
         print(f"-------------------")
 
     plot_clusters(X_train, labels, centroids, k=k)
