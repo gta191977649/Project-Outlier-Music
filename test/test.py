@@ -23,6 +23,7 @@ if __name__ == '__main__':
     ]
     pattern = extractTontalPitchDistancePattern(chords,key=home,mode="profile")
 
+
     print(pattern)
     home = "D:maj"
     chords = [
@@ -89,5 +90,25 @@ if __name__ == '__main__':
         "F:min",
     ]
 
+    pattern = extractTontalPitchDistancePattern(chords, key=home, mode="profile")
+    print(pattern)
+
+    # Test for linear
+    print("aa")
+    # Test for some shits
+    home = "C:maj"
+    chords = [
+        "C:maj",
+        "D:min",
+        "F:maj",
+    ]
+    pattern = extractTontalPitchDistancePattern(chords, key=home, mode="profile")
+    print(pattern)
+    home = "C:maj"
+    chords = [
+        "C:maj",
+        "D:min",
+        "G:maj",
+    ]
     pattern = extractTontalPitchDistancePattern(chords, key=home, mode="profile")
     print(pattern)

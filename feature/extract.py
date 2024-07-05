@@ -11,6 +11,7 @@ from pychord.constants import NOTE_VAL_DICT
 from model.note import *
 from model.vectormodel import Chord as VectorModel
 import time
+from pymusickit.key_finder import KeyFinder
 
 INDEX_NOTE_DICT = {v: k for k, v in NOTE_VAL_DICT.items()}
 
@@ -180,8 +181,12 @@ def extract_feature(file_path,feature):
         beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[4], fps=100)
         beats = beat_decoder(beat_processor(file_path))
     if feature == "key":
-        proc = CNNKeyRecognitionProcessor()(file_path)
-        detected = key_prediction_to_label(proc)
+        # proc = CNNKeyRecognitionProcessor()(file_path)
+        # detected = key_prediction_to_label(proc)
+        # key = detected.split(" ")[0]
+        # mode = detected.split(" ")[1]
+        detected = KeyFinder(file_path).key_primary
         key = detected.split(" ")[0]
         mode = detected.split(" ")[1]
+        print(f"🎹Key Detected: {key} {mode}")
         return key,mode

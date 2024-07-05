@@ -20,6 +20,8 @@ def extractTontalPitchDistancePattern(chordsArray,key='C:maj',mode="offset"):
             if chordsArray[i] == 'N' or chordsArray[i + 1] == 'N': continue
             a = to_harte_label(chordsArray[i])
             b = to_harte_label(chordsArray[i + 1])
+            key = to_harte_label(key)
+            print(a,b)
             tpd = TpsComparison(chord_a=a, chord_b=b, key_a=key, key_b=key)
             tpsd_singal.append(tpd.get_tpsd_distance())
 

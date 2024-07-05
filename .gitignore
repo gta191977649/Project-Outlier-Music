@@ -2,3 +2,4 @@
 .DS_Store
 *.pyc
 NATTEN/
+pre_processing/

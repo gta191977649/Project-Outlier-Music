@@ -18,19 +18,19 @@ import scipy
 import librosa
 from scipy.ndimage import filters
 
-
 if __name__ == '__main__':
-    H5 = "/Users/nurupo/Desktop/dev/music4all/custom/MV君はメロディー Short ver.  AKB48[公式].h5"
+    H5 = "/Users/nurupo/Desktop/dev/audio/nogizaka46/乃木坂46 31st 「ここにはないもの」 Best Shot Version..h5"
     AUDIO = "/Users/nurupo/Desktop/dev/music4all/custom/MV君はメロディー Short ver.  AKB48[公式].mp3"
 
-    #song = Song.from_h5(H5)
-    song = Song(id="AKB",title="TEST", artist="TEST",file=AUDIO)
+    song = Song.from_h5(H5)
+    #song = Song(id="AKB",title="TEST", artist="TEST",file=AUDIO)
 
     chords = []
     for item in song.chord:
         time, beat, chord = item
         chords.append(chord)
-    key = f"{song.key}:{song.mode[:3]}"
+    #key = f"{song.key}:{song.mode[:3]}"
+    key = f"B:maj"
 
     tps = extractTontalPitchDistancePattern(chords, mode="profile", key=key)
 

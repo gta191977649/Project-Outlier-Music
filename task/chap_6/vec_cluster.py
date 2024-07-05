@@ -138,8 +138,8 @@ if __name__ == '__main__':
     TARGET_MODE = "major"
     TARGET_SECTION = "chorus"
     #BEATS_PER_BAR = 4
-    PROGRESSION_LENGTH = 4#4 chords
-    PATH = "/Users/nurupo/Desktop/dev/audio/custom"
+    PROGRESSION_LENGTH = 8#4 chords
+    PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
     print(TARGET_SECTION)
     # loop all folder
 
@@ -168,7 +168,7 @@ if __name__ == '__main__':
         chord_progression = []
         times = []
         for i in range(len(song.chord)):
-            time, beat, chord = song.chord[i]
+            time, beat, chord = song.chord_transposed[i]
             chord = chord.replace(":", "")
 
             # Todo: ensuring beat alinment is correct
@@ -184,8 +184,8 @@ if __name__ == '__main__':
         # NOPE! We should take the first key from chord progression as home key instead!
         key = chord_progression[0]
         print(key)
-        signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
-        # signal = patternFeature.extractChromaticPattern(chord_progression)
+        #signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
+        signal = patternFeature.extractChromaticPattern(chord_progression)
         # if len(signal) >0:
         X_train.append(signal)
         Y_songs.append(song.title)
@@ -195,9 +195,9 @@ if __name__ == '__main__':
     print(X_train)
     X_train = normalize_to_max_length(X_train)
     X_train = np.array(X_train)
-    #eval_silhouette_score(X_train)
+    eval_silhouette_score(X_train)
 
-    k = 3
+    k =8
     kmeans = MODEL(n_clusters=k,  random_state=0)
     km = kmeans.fit(X_train)
     centroids = kmeans.cluster_centers_
