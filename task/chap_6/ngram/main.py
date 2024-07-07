@@ -51,15 +51,22 @@ def array_to_corpus(X):
     return corpus
 
 
+def processContour(harmonicRepresentation):
+    Contour = []
+    for i in range(len(harmonicRepresentation)):
+        if i + 1 < len(harmonicRepresentation):
+            Contour.append(harmonicRepresentation[i+1] - harmonicRepresentation[i])
 
+    return Contour
 if __name__ == '__main__':
     #TARGET_MODE = "major"
     TARGET_SECTION = "chorus"
     #BEATS_PER_BAR = 4
     PROGRESSION_LENGTH = 4#4 chords
-    #PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
+    PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
     #PATH = "/Users/nurupo/Desktop/dev/music4all/akb48"
-    PATH = "/Users/nurupo/Desktop/dev/music4all/europe"
+    #PATH = "/Users/nurupo/Desktop/dev/audio/aimyon"
+    #PATH = "/Users/nurupo/Desktop/dev/music4all/europe"
     print(TARGET_SECTION)
     # loop all folder
 
@@ -97,6 +104,9 @@ if __name__ == '__main__':
             #         #print(song.title,time, beat, chord,"YES")
             #         chord_progression.append(chord)
             #         times.append(time)
+            if chord == 'N':
+                #print("SKIP N Chord")
+                continue
             chord_progression.append(chord)
 
         if len(chord_progression) == 0:
@@ -105,13 +115,20 @@ if __name__ == '__main__':
         #key = f"{song.key}:{song.mode[:3]}"
         # NOPE! We should take the first key from chord progression as home key instead!
         #key = chord_progression[0] # Sets at first chord in progression
-        key = song.key
+        key = f"{song.key}:{song.mode[:3]}"
         print(key)
         signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
+        # Get the contour information (simply by using subtract)
+        #signal = processContour(signal)
         X_train.append(signal)
         Y_songs.append(song.title)
         Y_timming.append(times)
         Y_chord_progressions.append(chord_progression)
+
+        # for idx,val in enumerate(signal):
+        #     if val == 5.0:
+        #         s = patternFeature.extractTontalPitchDistancePattern([chord_progression[idx]], key, mode="profile")
+        #         print(s,key,chord_progression[idx])
 
 
 
@@ -119,9 +136,15 @@ if __name__ == '__main__':
     print(X_train)
     # Create N-Gram
 
-    vectorizer = CountVectorizer(stop_words=None, token_pattern=r"(?u)\b\w+\b", ngram_range=(3, 3))
+    # Create N-Gram
+    stopWords = ([
+        "4",  # Remove Perfect Cadence
+        "0"  # Remove Tonic Case
+    ])
+    vectorizer = CountVectorizer(stop_words=stopWords, token_pattern=r"[-]?\d+", ngram_range=(4, 4))
     X = vectorizer.fit_transform(X_train)
-    freq = X.toarray()
+
+    print(vectorizer.get_feature_names_out())
 
     tfidf_transformer = TfidfTransformer(use_idf=True)
     train_data = tfidf_transformer.fit_transform(X)
@@ -151,4 +174,6 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
 
-    print(df_idf)
+    # Sort the DataFrame by IDF weights
+    df_idf_sorted = df_idf.sort_values(by="idf_weights", ascending=True)
+    print(df_idf_sorted)

@@ -33,7 +33,8 @@ def extractTontalPitchDistancePattern(chordsArray,key='C:maj',mode="offset"):
             key = to_harte_label(key)
 
             tpd = TpsComparison(chord_a=a, chord_b=b, key_a=key, key_b=key)
-            tpsd_singal.append(tpd.get_tpsd_distance())
+            tpsd_singal.append(tpd.chord_distance_rule()/2)
+            #tpsd_singal.append(tpd.distance())
 
     return tpsd_singal
 
