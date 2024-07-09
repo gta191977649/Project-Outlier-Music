@@ -63,7 +63,9 @@ if __name__ == '__main__':
     TARGET_SECTION = "chorus"
     #BEATS_PER_BAR = 4
     PROGRESSION_LENGTH = 4#4 chords
-    PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
+    #PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
+    PATH = "E:\\dev\\research\\dataset\\mp3\\mozart"
+    #PATH = "E:\\dev\\research\\dataset\\mp3\\haydn"
     #PATH = "/Users/nurupo/Desktop/dev/music4all/akb48"
     #PATH = "/Users/nurupo/Desktop/dev/audio/aimyon"
     #PATH = "/Users/nurupo/Desktop/dev/music4all/europe"
@@ -139,9 +141,9 @@ if __name__ == '__main__':
     # Create N-Gram
     stopWords = ([
         "4",  # Remove Perfect Cadence
-        "0"  # Remove Tonic Case
+        "0",  # Remove Tonic Case
     ])
-    vectorizer = CountVectorizer(stop_words=stopWords, token_pattern=r"[-]?\d+", ngram_range=(4, 4))
+    vectorizer = CountVectorizer(stop_words=None, token_pattern=r"[-]?\d+", ngram_range=(4, 4))
     X = vectorizer.fit_transform(X_train)
 
     print(vectorizer.get_feature_names_out())
@@ -154,9 +156,10 @@ if __name__ == '__main__':
     # Create a DataFrame for TF-IDF values with feature names
     df_tfidf = pd.DataFrame(train_data, columns=vectorizer.get_feature_names_out())
 
-    # Plotting TF-IDF values
+    # Plotting TF-IDF values using plt.plot
     plt.figure(figsize=(15, 10))
-    sns.barplot(data=df_tfidf.mean().reset_index(), x='index', y=0)
+    mean_tfidf_values = df_tfidf.mean().reset_index()
+    plt.bar(mean_tfidf_values['index'], mean_tfidf_values[0])
     plt.xticks(rotation=90)
     plt.xlabel('N-grams')
     plt.ylabel('Average TF-IDF Score')
