@@ -1,13 +1,14 @@
 import numpy as np
 from model.song import Song
 import feature.pattern as patternFeature
+import feature.beat as beatAnlysis
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer,TfidfTransformer
 import seaborn as sns
 import matplotlib.pylab as plt
 from nltk import ngrams
-
+import re
 
 def normalize_to_max_length(X_train):
     # Find the maximum length of the sequences in X_train
@@ -47,7 +48,9 @@ def generateNgrams(sentence,n= 2):
     sentence = ""
 
 def array_to_corpus(X):
-    corpus = [" ".join(map(str, row)) for row in X]
+    corpus = ""
+    for item in X:
+        corpus += f"{item} "
     return corpus
 
 
@@ -63,12 +66,14 @@ if __name__ == '__main__':
     TARGET_SECTION = "chorus"
     #BEATS_PER_BAR = 4
     PROGRESSION_LENGTH = 4#4 chords
+    PATH = "/Users/nurupo/Desktop/dev/audio/europe"
     #PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
-    PATH = "E:\\dev\\research\\dataset\\mp3\\mozart"
+    #PATH = "/Users/nurupo/Desktop/dev/audio/akb48"
     #PATH = "E:\\dev\\research\\dataset\\mp3\\haydn"
     #PATH = "/Users/nurupo/Desktop/dev/music4all/akb48"
     #PATH = "/Users/nurupo/Desktop/dev/audio/aimyon"
-    #PATH = "/Users/nurupo/Desktop/dev/music4all/europe"
+    #PATH = "/Users/nurupo/Desktop/dev/audio/mozart"
+    #PATH = "/Users/nurupo/Desktop/dev/audio/haydn"
     print(TARGET_SECTION)
     # loop all folder
 
@@ -96,6 +101,7 @@ if __name__ == '__main__':
         sections = song.section
         chord_progression = []
         times = []
+        x_feature = []
         for i in range(len(song.chord)):
             time, beat, chord = song.chord[i]
             chord = chord.replace(":", "")
@@ -118,11 +124,16 @@ if __name__ == '__main__':
         # NOPE! We should take the first key from chord progression as home key instead!
         #key = chord_progression[0] # Sets at first chord in progression
         key = f"{song.key}:{song.mode[:3]}"
+        #tempoClass = beatAnlysis.getTempoMarking(song.tempo)
+        tempoClass = beatAnlysis.getTempoMarkingEncode(song.tempo)
+        print(tempoClass)
         print(key)
         signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
         # Get the contour information (simply by using subtract)
         #signal = processContour(signal)
-        X_train.append(signal)
+        for term in signal:
+            x_feature.append([term,tempoClass])
+
         Y_songs.append(song.title)
         Y_timming.append(times)
         Y_chord_progressions.append(chord_progression)
@@ -134,19 +145,26 @@ if __name__ == '__main__':
 
 
 
-    X_train = array_to_corpus(X_train)
+        X_train.append(array_to_corpus(x_feature))
     print(X_train)
-    # Create N-Gram
+
 
     # Create N-Gram
     stopWords = ([
         "4",  # Remove Perfect Cadence
         "0",  # Remove Tonic Case
     ])
-    vectorizer = CountVectorizer(stop_words=None, token_pattern=r"[-]?\d+", ngram_range=(4, 4))
+
+
+    def custom_tokenizer(text):
+        pattern = re.compile(r'\[\d+\.\d+, \d+\]')
+        matches = pattern.findall(text)
+        return matches
+    #vectorizer = CountVectorizer(stop_words=None, token_pattern=r"[-]?\d+", ngram_range=(4, 4))
+    vectorizer = CountVectorizer(stop_words=None, token_pattern=r'\[\d+\.\d+, \d+\]', ngram_range=(1, 1))
     X = vectorizer.fit_transform(X_train)
 
-    print(vectorizer.get_feature_names_out())
+    #print(vectorizer.get_feature_names_out())
 
     tfidf_transformer = TfidfTransformer(use_idf=True)
     train_data = tfidf_transformer.fit_transform(X)

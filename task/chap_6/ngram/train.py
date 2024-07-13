@@ -8,8 +8,13 @@ import seaborn as sns
 import matplotlib.pylab as plt
 from nltk import ngrams
 
-from sklearn.model_selection import train_test_split
-
+from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import recall_score, classification_report
+import feature.beat as beatAnlysis
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.linear_model import LogisticRegression
+LR = LogisticRegression(C=0.01, solver='liblinear')
 def normalize_to_max_length(X_train):
     # Find the maximum length of the sequences in X_train
     max_length = max(len(seq) for seq in X_train)
@@ -48,7 +53,9 @@ def generateNgrams(sentence,n= 2):
     sentence = ""
 
 def array_to_corpus(X):
-    corpus = [" ".join(map(str, row)) for row in X]
+    corpus = ""
+    for item in X:
+        corpus += f"{item} "
     return corpus
 
 
@@ -61,18 +68,17 @@ def processContour(harmonicRepresentation):
     return Contour
 
 def generateTrainingData(artists):
-    train_x = np.empty((0, 0))
+    # BEATS_PER_BAR = 4
+    PROGRESSION_LENGTH = 4  # 4 chords
+    X_feature = []
+    X_train = []
+    Y_label = []
     for artist in artists:
-        TARGET_SECTION = "chorus"
-        # BEATS_PER_BAR = 4
-        PROGRESSION_LENGTH = 4  # 4 chords
-        # PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
-        PATH = f"E:\\dev\\research\\dataset\\mp3\\{artist}"
-        # PATH = "E:\\dev\\research\\dataset\\mp3\\haydn"
-        # PATH = "/Users/nurupo/Desktop/dev/music4all/akb48"
-        # PATH = "/Users/nurupo/Desktop/dev/audio/aimyon"
-        # PATH = "/Users/nurupo/Desktop/dev/music4all/europe"
-        print(TARGET_SECTION)
+        #TARGET_SECTION = "chorus"
+
+        PATH = f"/Users/nurupo/Desktop/dev/audio/{artist}"
+        #PATH = "/Users/nurupo/Desktop/dev/audio/custom"
+        #print(TARGET_SECTION)
         # loop all folder
 
         song_collections = []
@@ -86,19 +92,12 @@ def generateTrainingData(artists):
                     song_collections.append(song)
 
         # Prepare pattern dataset
-        X_train = []
-        Y_songs = []
-        Y_chord_progressions = []
-        Y_timming = []
+        X_artist_song_vector = []
         for song in song_collections:
-            # for pat in song.chord_pattern:
-            #     progression = pat["pattern"]
-            #     signal = patternFeature.extractTontalPitchDistancePattern(progression)
-            #     X_train.append(signal)
-
             sections = song.section
             chord_progression = []
             times = []
+            Song_Tokens = ""
             for i in range(len(song.chord)):
                 time, beat, chord = song.chord[i]
                 chord = chord.replace(":", "")
@@ -117,49 +116,66 @@ def generateTrainingData(artists):
             if len(chord_progression) == 0:
                 print(f"Invaild chord progression: {song.title}")
                 continue
-            # key = f"{song.key}:{song.mode[:3]}"
-            # NOPE! We should take the first key from chord progression as home key instead!
-            # key = chord_progression[0] # Sets at first chord in progression
+
             key = f"{song.key}:{song.mode[:3]}"
-            print(key)
+            tempoClass = beatAnlysis.getTempoMarkingEncode(song.tempo)
+            print(key,song.title)
             signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
-            # Get the contour information (simply by using subtract)
-            # signal = processContour(signal)
-            X_train.append(signal)
-            Y_songs.append(song.title)
-            Y_timming.append(times)
-            Y_chord_progressions.append(chord_progression)
+            for term in signal:
+                Song_Tokens = Song_Tokens+f"[{term},{tempoClass}]"
+                #Song_Tokens.append([term, tempoClass])
+            print(Song_Tokens)
+            X_artist_song_vector.append(Song_Tokens)
+            Y_label.append(artist)
+            X_feature.append(Song_Tokens)
 
-            # for idx,val in enumerate(signal):
-            #     if val == 5.0:
-            #         s = patternFeature.extractTontalPitchDistancePattern([chord_progression[idx]], key, mode="profile")
-            #         print(s,key,chord_progression[idx])
+    # done proceess stat for all artists
+    print(f"Finish process all artists.")
+    stopWords = ([
+        "4",  # Remove Perfect Cadence
+        "0",  # Remove Tonic Case
+    ])
+    vectorizer = CountVectorizer(stop_words=None, token_pattern=r'\[\d+\.\d+,\d+\]', ngram_range=(1, 1))
+    X = vectorizer.fit_transform(X_feature)
+    #print(vectorizer.get_feature_names_out())
 
-        X_train = array_to_corpus(X_train)
-        # print(X_train)
-        # Create N-Gram
+    tfidf_transformer = TfidfTransformer(use_idf=True)
+    X_tfidf = tfidf_transformer.fit_transform(X)
+    X_tfidf = X_tfidf.toarray()
+    for item in X_tfidf:
+        X_train.append(item)
+    # print(X_tfidf)
 
-        # Create N-Gram
-        stopWords = ([
-            "4",  # Remove Perfect Cadence
-            "0",  # Remove Tonic Case
-        ])
-        vectorizer = CountVectorizer(stop_words=None, token_pattern=r"[-]?\d+", ngram_range=(4, 4))
-        X = vectorizer.fit_transform(X_train)
+    return X_train, Y_label
 
-        print(vectorizer.get_feature_names_out())
-
-        tfidf_transformer = TfidfTransformer(use_idf=True)
-        train_data = tfidf_transformer.fit_transform(X)
-        X_train = train_data.toarray()
-        # merge training data
-        print(X_train.shape)
 
 
 if __name__ == '__main__':
     #TARGET_MODE = "major"
-    generateTrainingData([
-        "mozart",
-        "haydn"
+    train_x, y = generateTrainingData([
+        "europe",
+        #"akb48",
+        #"nogizaka46",
+        "aimyon",
+        # "haydn",
+        #"mozart",
     ])
+    #print(train_x.shape, y )
+    X_train, X_test, y_train, y_test = train_test_split(
+        train_x, y, test_size=0.3, random_state=42)
+    #print(X_train, X_test, y_train, y_test)
+    model = SVC(kernel='rbf')
+    model.fit(X_train, y_train)
 
+    predictions = model.predict(X_test)
+
+    recall = recall_score(y_test, predictions, average="macro")
+    print(f"recall: {recall}")
+
+    report = classification_report(y_test, predictions, target_names=model.classes_)
+    print(report)
+
+    # Cross-validation to better estimate model performance
+    scores = cross_val_score(model, train_x, y, cv=5, scoring='recall_macro')
+    print(f"Cross-validation recall scores: {scores}")
+    print(f"Mean cross-validation recall: {scores.mean()}")

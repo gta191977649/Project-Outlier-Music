@@ -138,8 +138,8 @@ if __name__ == '__main__':
     TARGET_MODE = "major"
     TARGET_SECTION = "chorus"
     #BEATS_PER_BAR = 4
-    PROGRESSION_LENGTH = 4#4 chords
-    PATH = "/Users/nurupo/Desktop/dev/audio/custom"
+    PROGRESSION_LENGTH = 8#4 chords
+    PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
     print(TARGET_SECTION)
     # loop all folder
 
@@ -195,9 +195,9 @@ if __name__ == '__main__':
     print(X_train)
     X_train = normalize_to_max_length(X_train)
     X_train = np.array(X_train)
-    #eval_silhouette_score(X_train)
+    eval_silhouette_score(X_train)
 
-    k = 3
+    k = 13
     kmeans = MODEL(n_clusters=k,  random_state=0)
     km = kmeans.fit(X_train)
     centroids = kmeans.cluster_centers_
