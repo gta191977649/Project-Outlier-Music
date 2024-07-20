@@ -110,17 +110,21 @@ if __name__ == '__main__':
     chords = [
         "C:maj",
         "D:min",
+        "E:min",
+        "F:maj",
         "G:maj",
+        "A:min",
+        "B:dim",
     ]
     pattern = extractTontalPitchDistancePattern(chords, key=home, mode="profile")
     print(pattern)
 
-    tps_comparison = TpsComparison(chord_a='C:maj', key_a='C:maj', chord_b='A:min', key_b='C:maj')
-    circle_of_fifth_rule = tps_comparison.circle_fifth_rule()
-    chord_distance_rule = tps_comparison.chord_distance_rule()
-
-    tpsd_distance = tps_comparison.chord_distance_rule() / 2
-    tps_comparison.plot()
-    print(circle_of_fifth_rule)
-    print(chord_distance_rule)
-    print(tpsd_distance)
+    # tps_comparison = TpsComparison(chord_a='C:maj', key_a='C:maj', chord_b='A:min', key_b='C:maj')
+    # circle_of_fifth_rule = tps_comparison.circle_fifth_rule()
+    # chord_distance_rule = tps_comparison.chord_distance_rule()
+    #
+    # tpsd_distance = tps_comparison.chord_distance_rule() / 2
+    # tps_comparison.plot()
+    # print(circle_of_fifth_rule)
+    # print(chord_distance_rule)
+    # print(tpsd_distance)
