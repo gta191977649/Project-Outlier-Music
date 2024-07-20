@@ -66,13 +66,14 @@ if __name__ == '__main__':
     TARGET_SECTION = "chorus"
     #BEATS_PER_BAR = 4
     PROGRESSION_LENGTH = 4#4 chords
-    PATH = "/Users/nurupo/Desktop/dev/audio/europe"
+
+    #PATH = "/Users/nurupo/Desktop/dev/audio/europe"
     #PATH = "/Users/nurupo/Desktop/dev/audio/nogizaka46"
     #PATH = "/Users/nurupo/Desktop/dev/audio/akb48"
     #PATH = "E:\\dev\\research\\dataset\\mp3\\haydn"
     #PATH = "/Users/nurupo/Desktop/dev/music4all/akb48"
     #PATH = "/Users/nurupo/Desktop/dev/audio/aimyon"
-    #PATH = "/Users/nurupo/Desktop/dev/audio/mozart"
+    PATH = "/Users/nurupo/Desktop/dev/audio/mozart"
     #PATH = "/Users/nurupo/Desktop/dev/audio/haydn"
     print(TARGET_SECTION)
     # loop all folder
@@ -131,6 +132,9 @@ if __name__ == '__main__':
         signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
         # Get the contour information (simply by using subtract)
         #signal = processContour(signal)
+        remove_numbers = {4,0}  # Get rid of perfect / half / tonic cadence
+        signal = [num for num in signal if num not in remove_numbers]
+
         for term in signal:
             x_feature.append([term,tempoClass])
 
@@ -151,7 +155,7 @@ if __name__ == '__main__':
 
     # Create N-Gram
     stopWords = ([
-        "4",  # Remove Perfect Cadence
+        "4,5",  # Remove Perfect Cadence
         "0",  # Remove Tonic Case
     ])
 

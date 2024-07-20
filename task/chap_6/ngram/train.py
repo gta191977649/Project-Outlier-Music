@@ -121,6 +121,9 @@ def generateTrainingData(artists):
             tempoClass = beatAnlysis.getTempoMarkingEncode(song.tempo)
             print(key,song.title)
             signal = patternFeature.extractTontalPitchDistancePattern(chord_progression, key, mode="profile")
+            remove_numbers = {4, 0}  # Get rid of perfect / half / tonic cadence
+            signal = [num for num in signal if num not in remove_numbers]
+
             for term in signal:
                 Song_Tokens = Song_Tokens+f"[{term},{tempoClass}]"
                 #Song_Tokens.append([term, tempoClass])
@@ -154,10 +157,10 @@ if __name__ == '__main__':
     #TARGET_MODE = "major"
     train_x, y = generateTrainingData([
         "europe",
-        #"akb48",
+        "akb48",
         #"nogizaka46",
-        "aimyon",
-        # "haydn",
+        #"aimyon",
+        #"haydn",
         #"mozart",
     ])
     #print(train_x.shape, y )

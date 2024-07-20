@@ -1,5 +1,6 @@
 import time
 
+import librosa
 import madmom, scipy.stats, numpy as np
 from madmom.audio.chroma import DeepChromaProcessor
 from madmom.features.downbeats import RNNDownBeatProcessor, DBNDownBeatTrackingProcessor
@@ -175,6 +176,14 @@ def extract_feature(file_path,feature):
     if feature == "deep_chroma":
         dcp = DeepChromaProcessor()
         chroma = dcp(file_path)
+        return chroma
+    if feature == "chroma_stft":
+        y,sr = librosa.load(file_path)
+        chroma = librosa.feature.chroma_stft(y=y, sr=sr)
+        return chroma
+    if feature == "chroma_cqt":
+        y, sr = librosa.load(file_path)
+        chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
         return chroma
     if feature == "downbeats":
         beat_processor = RNNDownBeatProcessor()
