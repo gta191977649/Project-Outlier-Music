@@ -1,15 +1,22 @@
-from chordparser import Parser
-# Initialize the parser
-cp = Parser()
+from model.song import Song
+import matplotlib.pyplot as plt
 
-# Define a key
-key = 'C'
+if __name__ == '__main__':
+    audio_file = r"/mnt/f/music4all/pop/0XTBHHzLg9mngdvU.h5"
+    song = Song.from_h5(audio_file)
 
-# Define a chord progression using chord symbols
-chord_symbols = ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim']
+    print(song.chord_change)
+    estimate_key = f"{song.key}:{song.mode[:3]}"
 
-# Analyze and print Roman numerals for each chord symbol
-for symbol in chord_symbols:
-    new_chord = cp.create_chord(symbol)
-    rn = cp.to_roman(new_chord, cp.create_scale(key, "major"))
-    print(f'{symbol}: {rn}')
+    chord_change_sequence = {}
+    current = None
+
+    for chord in song.chord_transposed:
+        time, beat, label = chord
+        if label == "N": continue
+        if beat == '1.0': print("------------------")
+        print(time, beat, label)
+        # if not label == current:
+        #     print(time, beat, label)
+        # current = label
+
