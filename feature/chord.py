@@ -38,7 +38,7 @@ def extractChordNumeralValues(chord_array,mode ="major"):
     return val_array
 
 def extractCadencePatternFeature(chord_label_array):
-    
+
     cadence_pattern = []
 
 
