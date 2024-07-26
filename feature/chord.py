@@ -2,9 +2,46 @@ from tslearn.metrics import dtw_path,dtw
 from model.song import Song
 from feature import extract as feature
 
-import pattern as pt
 import pandas as pd
 import matplotlib.pyplot as plt
+
+key_map = {
+    "C": 0,
+    "C#": 0.5,
+    "Db": 0.5,
+    "D": 1,
+    "D#": 1.5,
+    "Eb": 1.5,
+    "E": 2,
+    "F": 2.5,
+    "F#": 3,
+    "Gb": 3,
+    "G": 3.5,
+    "G#": 4,
+    "Ab": 4,
+    "A": 4.5,
+    "A#": 5,
+    "Bb": 5,
+    "B": 5.5
+}
+def extractChordNumeralValues(chord_array,mode ="major"):
+    val_array = []
+
+    if mode == "major":
+        for chord in chord_array:
+            #base = chord.split("maj")[0] if "maj" in chord else chord.split("min")[0]
+            base = chord.split(":")[0]
+            if base in key_map:
+                val_array.append(key_map[base])
+            else:
+                print(f"{base} is not a valid chord")
+    return val_array
+
+def extractCadencePatternFeature(chord_label_array):
+    
+    cadence_pattern = []
+
+
 
 def extractChordSummrisation(song : Song,window =16,start_on_down_beat = True):
     if not song:
@@ -127,10 +164,5 @@ def plotChordSummary(song :Song, summary):
     plt.show()
 
 if __name__ == '__main__':
-    SONG = "/Users/nurupo/Desktop/dev/audio/akb48/君はメロディー [9Spu8vH0eUs].h5"
-
-    song = Song.from_h5(SONG)
-
-    summary = extractChordSummrisation(song)
-    plotChordSummary(song,summary)
-    print(summary)
+    singal = extractChordNumeralValues(["C:maj","G:maj"])
+    print(singal)
