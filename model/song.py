@@ -146,3 +146,11 @@ class Song:
         song.section = section
         return song
 
+    def extractChordProgressionLabels(self,transposed = False):
+        chordProgressionLabels = []
+        chord_sequence = transposed and self.chord_transposed or self.chord
+        for chord in chord_sequence:
+            time, beat, label = chord
+            if not label == "N":
+                chordProgressionLabels.append(label)
+        return chordProgressionLabels

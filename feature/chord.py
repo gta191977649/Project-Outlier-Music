@@ -24,17 +24,41 @@ key_map = {
     "Bb": 5,
     "B": 5.5
 }
-def extractChordNumeralValues(chord_array,mode ="major"):
+
+
+def extractChordNumeralValues(chord_array, mode="major"):
     val_array = []
 
-    if mode == "major":
-        for chord in chord_array:
-            #base = chord.split("maj")[0] if "maj" in chord else chord.split("min")[0]
+    for chord in chord_array:
+        # Initialize base to None
+        base = None
+
+        # Case 1: Chord label with ":" splitter (e.g., C:maj, E:min)
+        if ":" in chord:
             base = chord.split(":")[0]
-            if base in key_map:
-                val_array.append(key_map[base])
+
+        # Case 2: Chord label without ":" splitter (e.g., Cmaj, Emin)
+        else:
+            # Find the first occurrence of "maj" or "min"
+            maj_index = chord.find("maj")
+            min_index = chord.find("min")
+
+            if maj_index != -1:
+                base = chord[:maj_index]
+            elif min_index != -1:
+                base = chord[:min_index]
             else:
-                print(f"{base} is not a valid chord")
+                # If neither "maj" nor "min" is found, assume the entire string is the base
+                base = chord
+
+        # Ensure the base is stripped of any whitespace
+        base = base.strip() if base else None
+
+        if base and base in key_map:
+            val_array.append(key_map[base])
+        else:
+            print(f"'{chord}' is not a valid chord or its base '{base}' is not in the key map")
+
     return val_array
 
 def extractCadencePatternFeature(chord_label_array):

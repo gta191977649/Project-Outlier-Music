@@ -1,6 +1,4 @@
-from sf_segmenter.segmenter import Segmenter
 import librosa
-import miditoolkit
 import matplotlib.pyplot as plt
 from feature.dataset import *
 import feature.chord as chord
@@ -117,7 +115,7 @@ def plot_clusters(X_train, labels, centroids, k):
 if __name__ == '__main__':
     # harmonic_progression = ['Fmaj', 'Cmaj', 'Gmaj', 'Amin']
 
-    songs = loadSongCollection("/Users/nurupo/Desktop/dev/music4all/test_sample",filter="major")
+    songs = loadSongCollection(r"F:\music4all\sample_test",mode="major")
 
     chord_singals = []
 
@@ -131,7 +129,7 @@ if __name__ == '__main__':
     X_train = stretch_to_max_length(chord_singals)
     eval_silhouette_score(X_train)
 
-    k = 7
+    k = 12
     kmeans = MODEL(n_clusters=k, random_state=0)
     km = kmeans.fit(X_train)
     centroids = kmeans.cluster_centers_
