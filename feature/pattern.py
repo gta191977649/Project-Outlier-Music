@@ -171,3 +171,36 @@ def summaryChordPattern(chordsArray,window = 16):
            # print(pattern,len(details['matches']))
     #pattern_freq = {pattern: len(details['matches']) for pattern, details in matched_patterns.items() if len(details['matches']) > 0}
     return output
+
+def find_cadence_patterns(main_signal, cadence_pattern, min_preceding_chords=2, allow_repetitions=True):
+    """
+    Find multiple occurrences of a cadence pattern in the main signal using exact matching,
+    with an option to allow or disallow repetitive chords.
+
+    Parameters:
+    - main_signal: The main chord progression signal (list of numbers)
+    - cadence_pattern: The cadence pattern to search for (list of numbers)
+    - min_preceding_chords: Minimum number of chords required before the cadence pattern (default: 2)
+    - allow_repetitions: Whether to allow repetitive chords in the progression (default: True)
+
+    Returns:
+    - A list of tuples, each containing (start_index, end_index) of found patterns
+    """
+    pattern_length = len(cadence_pattern)
+    matches = []
+
+    for i in range(min_preceding_chords, len(main_signal) - pattern_length + 1):
+        # Check if the cadence pattern matches exactly
+        if main_signal[i:i + pattern_length] == cadence_pattern:
+            # Check if there are enough preceding chords
+            if i >= min_preceding_chords:
+                # If repetitions are not allowed, check for unique chords
+                if not allow_repetitions:
+                    progression = main_signal[i - min_preceding_chords:i + pattern_length]
+                    if len(set(progression)) == len(progression):
+                        matches.append((i - min_preceding_chords, i + pattern_length))
+                else:
+                    matches.append((i - min_preceding_chords, i + pattern_length))
+
+    return matches
+

@@ -1,8 +1,8 @@
 from yt_dlp import YoutubeDL
 
 if __name__ == '__main__':
-    video_url = "https://www.youtube.com/watch?v=vIIcDnE0AWI&list=RDEM1I5qcGGzeVntNSQ69HoxEQ"
-    download_folder = '/Users/nurupo/Desktop/dev/audio/nkpop'
+    video_url = "https://www.youtube.com/watch?v=Bnx85z78O2w"
+    download_folder = '/Users/nurupo/Desktop/dev/audio/test'
 
     options = {
         'format': 'bestaudio/best',
@@ -12,7 +12,7 @@ if __name__ == '__main__':
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
-            'preferredquality': '128',
+            'preferredquality': '90',
         }]
     }
 

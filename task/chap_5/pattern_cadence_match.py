@@ -93,7 +93,7 @@ def plot_clusters(X_train, labels, centroids, k,style="default"):
     plt.show()
 
 if __name__ == '__main__':
-    songs = loadSongCollection(r"F:\music4all\sample_test", mode="major")
+    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/test_sample", mode="major")
 
     chord_signals = []
 
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     print(f"Total: {X_train.shape[0]}")
     eval_silhouette_score(X_train)
 
-    k = 60
+    k = 57
     kmeans = MODEL(n_clusters=k, random_state=0)
     km = kmeans.fit(X_train)
     centroids = kmeans.cluster_centers_
