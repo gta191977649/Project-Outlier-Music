@@ -1,7 +1,7 @@
 from yt_dlp import YoutubeDL
 
 if __name__ == '__main__':
-    video_url = "https://www.youtube.com/watch?v=Bnx85z78O2w"
+    video_url = "https://www.youtube.com/watch?v=qtt7z9Y6-go"
     download_folder = '/Users/nurupo/Desktop/dev/audio/test'
 
     options = {
