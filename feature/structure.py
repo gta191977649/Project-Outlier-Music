@@ -704,21 +704,21 @@ def plot_path_family(ax, path_family, Fs=1, x_offset=0, y_offset=0, proj_x=True,
                                        facecolor=[0, 0, 1], edgecolor=[0, 0, 0]))
 if __name__ == '__main__':
 
-    path = "/Users/nurupo/Desktop/dev/audio/test/donki.mp3"
+    path = "/Users/nurupo/Desktop/dev/audio/test/Miracle Shopping ～ドン.キホーテのテーマ～ (カラオケ)....mp3"
     #X = feature.extract_feature(path,"chroma_cqt")
     Fs = 22050
     Hop_len = 2205
     x, Fs = librosa.load(path, sr=Fs)
 
+    print(f"wave len:{len(x)}")
     X = librosa.feature.chroma_stft(y=x, sr=Fs, tuning=0, norm=2, hop_length=Hop_len, n_fft=4410)
-
+    print(f"chroma len:{X.shape[1]}")
 
 
     # Chroma Feature Sequence and SSM (10 Hz)
     L, H = 41, 10
     Fs_C = Fs / Hop_len
     X,Fs_feature = smooth_downsample_feature_sequence(X, Fs_C, filt_len=L, down_sampling=H)
-
     X = normalize_feature_sequence(X, norm='2', threshold=0.001)
 
 
@@ -729,9 +729,7 @@ if __name__ == '__main__':
     SSM_NORM = SSM
 
     # SSM Enhancement
-    SSM = filter_diag_sm(SSM,10)
-
-
+    SSM = filter_diag_sm(SSM,11)
 
     # SSM Transpose
     tempo_rel_set = libfmp.c4.compute_tempo_rel_set(0.66, 1.5, 5)
@@ -747,7 +745,7 @@ if __name__ == '__main__':
 
 
     # Audio Thumbnailing (Segment Matching & Path Packing)
-    seg_sec = [24,78]
+    seg_sec = [25,73]
     seg = [int(seg_sec[0] * Fs_feature), int(seg_sec[1] * Fs_feature)]
     N = SSM.shape[0]
     S_seg = SSM[:, seg[0]:seg[1] + 1]
@@ -778,6 +776,7 @@ if __name__ == '__main__':
         print(f"{t_start}\t{t_end}")
 
 
+
     # Novety Decection (Strcuture Boundary Detection)
     nov = compute_novelty_ssm(SSM_NORM, L=20, exclude=True)
     #peaks = peak_picking_simple(nov)
@@ -796,7 +795,7 @@ if __name__ == '__main__':
     plt.show()
 
     #sns.set(rc={'figure.figsize': (15, 5)})
-    sns.heatmap(SSM,cmap="gray_r")
+    sns.heatmap(SSM_NORM,cmap="gray_r")
     for peak in peaks:
         plt.axvline(x=peak, color='red', linestyle='--')
         plt.axhline(y=peak, color='red', linestyle='--')
