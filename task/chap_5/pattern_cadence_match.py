@@ -7,12 +7,12 @@ import librosa
 import matplotlib.pyplot as plt
 from tslearn.clustering import silhouette_score
 from sklearn.cluster import KMeans
+from collections import defaultdict
 
 from sklearn.preprocessing import normalize, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.utils.class_weight import compute_sample_weight
 from sklearn.tree import DecisionTreeClassifier
-import graphviz
 from sklearn import tree
 import seaborn as sns
 MODEL = KMeans
@@ -48,10 +48,12 @@ def find_cadence_patterns(main_signal, cadence_pattern, min_preceding_chords=2, 
 
     return matches
 
+
+
 def eval_silhouette_score(X):
     scores = []
     Sum_of_squared_distances = []
-    K = range(2, int(len(X) / 2))
+    K = range(2, int(len(X)/2))
     for k in K:
         kmeans = MODEL(n_init=10,n_clusters=k,  random_state=0)
         km = kmeans.fit(X)
@@ -80,6 +82,59 @@ def eval_silhouette_score(X):
     plt.title('Silhouette Score and Sum of Squared Distances for k')
     fig.tight_layout()
     plt.show()
+
+def eval_best_k(X, min_clusters=2, max_clusters=None, convergence_threshold=0.001):
+    """
+    Evaluate and determine the optimal number of clusters for KMeans using inertia.
+    Stop when the improvement in inertia falls below the convergence threshold.
+
+    Parameters:
+    - X: The data to be clustered.
+    - min_clusters: Minimum number of clusters to evaluate (default: 2).
+    - max_clusters: Maximum number of clusters to evaluate (default: half of the dataset size).
+    - convergence_threshold: Minimum improvement in inertia to continue evaluation (default: 0.01).
+
+    Returns:
+    - best_k: The optimal number of clusters based on inertia convergence.
+    """
+    inertia_values = []
+
+    # Determine maximum number of clusters if not provided
+    if max_clusters is None:
+        max_clusters = int(len(X) / 2)
+
+    best_k = min_clusters
+    prev_inertia = None
+
+    # Evaluate inertia for each k
+    for k in range(min_clusters, max_clusters):
+        kmeans = KMeans(n_init=10, n_clusters=k, random_state=0)
+        km = kmeans.fit(X)
+        inertia = km.inertia_
+        inertia_values.append(inertia)
+
+        # Check for convergence based on improvement threshold
+        if prev_inertia is not None and (prev_inertia - inertia) < convergence_threshold:
+            break
+
+        prev_inertia = inertia
+        best_k = k
+
+    # Plot the results
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(min_clusters, min_clusters + len(inertia_values)), inertia_values, 'bx-')
+    plt.xlabel('k')
+    plt.ylabel('Inertia (Sum of Squared Distances)')
+    plt.title('Inertia for Different k Values')
+    plt.axvline(x=best_k, color='green', linestyle='--', label=f'Optimal k={best_k}')
+    plt.legend(loc='upper right')
+    plt.tight_layout()
+    plt.show()
+
+    print(f"Optimal number of clusters: {best_k}")
+
+    return best_k
+
 
 def plot_data(data):
     plt.figure(figsize=(8, 6))
@@ -122,12 +177,73 @@ def plot_clusters(X_train, labels, centroids, k, style="default"):
     plt.tight_layout()
     plt.show()
 
+
+def plot_pattern_frequency(chord_signals, labels):
+    """
+    Plot a bar chart showing the frequency of patterns in each cluster.
+
+    Parameters:
+    - chord_signals: A list of chord numeral patterns.
+    - labels: A list of cluster labels corresponding to each chord pattern.
+    """
+    # Create a dictionary to hold chord patterns by cluster
+    cluster_chords = defaultdict(list)
+
+    # Organize chord patterns by cluster
+    for idx, label in enumerate(labels):
+        cluster_chords[label].append(chord_signals[idx])
+
+    # Sort clusters by size (number of patterns) in descending order
+    sorted_clusters = sorted(cluster_chords.items(), key=lambda x: len(x[1]), reverse=True)
+
+    # Prepare data for plotting
+    cluster_names = []
+    pattern_counts = []
+
+    for cluster_id, patterns in sorted_clusters:
+        num_patterns = len(patterns)
+        pattern_counts.append(num_patterns)
+
+        # Use the first pattern as the cluster name
+        first_pattern = patterns[0]
+        chord_labels = translateNumeralValuesToChords(first_pattern)
+        cluster_name = " ".join(chord_labels)
+        cluster_names.append(cluster_name)
+
+    # Plot the bar chart
+    plt.figure(figsize=(25, 5))
+    plt.bar(range(len(pattern_counts)), pattern_counts, tick_label=cluster_names, align='center',color='blue', width=0.8)
+    plt.xticks(rotation=90)
+    plt.xlabel('Cluster (First Chord Pattern)')
+    plt.ylabel('Number of Patterns')
+    plt.title('Number of Patterns in Each Cluster')
+    plt.tight_layout()
+    plt.show()
+def print_chord_patterns_by_cluster(chord_signals, labels, num_clusters, mode="major"):
+    # Create a dictionary to hold chord patterns by cluster
+    cluster_chords = defaultdict(list)
+
+    # Organize chord patterns by cluster
+    for idx, label in enumerate(labels):
+        cluster_chords[label].append(chord_signals[idx])
+
+    # Sort clusters by size (number of patterns) in descending order
+    sorted_clusters = sorted(cluster_chords.items(), key=lambda x: len(x[1]), reverse=True)
+
+    # Print the chord patterns and labels for each cluster
+    for cluster_id, patterns in sorted_clusters:
+        print(f"\nCluster {cluster_id + 1} (Number of patterns: {len(patterns)}):")
+        for signal in patterns:
+            chord_labels = translateNumeralValuesToChords(signal, mode=mode)
+            print(f"Chord Pattern (Numerals): {signal}")
+            print(f"Chord Labels: {chord_labels}")
+
 if __name__ == '__main__':
     #songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/test_sample", mode="major")
-    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/akb48", mode="major")
+    songs = loadSongCollection(r"/mnt/f/dataset/akb48", mode="major")
 
     chord_signals = []
-
+    chord_labels = []
     cadece_consider = [
         ["G:maj", "C:maj"], # Perfect Cadence
         ["F:maj", "C:maj"], # Plagal Cadence
@@ -140,6 +256,7 @@ if __name__ == '__main__':
         chords = target_song.extractChordProgressionLabels(transposed=True)
         x = extractChordNumeralValues(chords)
         x = filterRepeatSignal(x)
+        chords = filterRepeatSignal(chords)
 
         # do candence match
         for cadece in cadece_consider:
@@ -147,6 +264,7 @@ if __name__ == '__main__':
             matches = find_cadence_patterns(x, cadence_signal, min_preceding_chords=2)
             for start, end in matches:
                 chord_signals.append(x[start:end])
+                chord_labels.append(chords[start:end])
             # plotHarmonicProgression(chord_singal)
 
 
@@ -157,9 +275,11 @@ if __name__ == '__main__':
 
 
     print(f"Total: {X_train.shape[0]}")
-    eval_silhouette_score(X_train)
+    #eval_silhouette_score(X_train)
 
-    k = 103
+    #k = eval_best_k(X_train)
+    k = 222
+
     kmeans = MODEL(n_init=10,n_clusters=k, random_state=0)
     km = kmeans.fit(X_train)
     centroids = kmeans.cluster_centers_
@@ -168,13 +288,10 @@ if __name__ == '__main__':
     print(f"N of centroids: {len(centroids)}")
     plot_clusters(X_train, labels, centroids, k=k,style="default")
 
-    # Decision tree
-    clf = tree.DecisionTreeClassifier(max_depth=4)
-    clf = clf.fit(X_train,labels)
-    plt.figure(figsize=(50, 50))
-    tree.plot_tree(clf, fontsize=10)
-    plt.show()
+    plot_pattern_frequency(chord_signals, labels)
 
+    # Print chord patterns by cluster
+    print_chord_patterns_by_cluster(chord_signals, labels, k)
 def test():
     file = r"F:\music4all\pop_h5\0XTBHHzLg9mngdvU.h5"
     song = Song.from_h5(file)

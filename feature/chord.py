@@ -24,7 +24,15 @@ key_map = {
     "Bb": 5,
     "B": 5.5
 }
+# Initialize an empty reverse map
+reverse_key_map = {}
 
+# Populate the reverse map by iterating over the key_map
+for chord, value in key_map.items():
+    if value in reverse_key_map:
+        reverse_key_map[value] += f"/{chord}"
+    else:
+        reverse_key_map[value] = chord
 
 def extractChordNumeralValues(chord_array, mode="major"):
     val_array = []
@@ -61,6 +69,22 @@ def extractChordNumeralValues(chord_array, mode="major"):
 
     return val_array
 
+
+def translateNumeralValuesToChords(numeral_values, mode="major"):
+    chord_array = []
+
+    for value in numeral_values:
+        # Get the base chord from the reverse map
+        base_chord = reverse_key_map.get(value, None)
+
+        if base_chord:
+            # Append chord with mode (e.g., C:maj, D:min)
+            chord = f"{base_chord}"
+            chord_array.append(chord)
+        else:
+            print(f"Numeral value '{value}' does not correspond to a known chord.")
+
+    return chord_array
 def extractCadencePatternFeature(chord_label_array):
 
     cadence_pattern = []
