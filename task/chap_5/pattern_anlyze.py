@@ -16,7 +16,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
 import seaborn as sns
 from model.analyzer import *
-
 def find_cadence_patterns(main_signal, cadence_pattern, min_preceding_chords=2, allow_repetitions=True):
     """
     Find multiple occurrences of a cadence pattern in the main signal using exact matching,
@@ -49,40 +48,6 @@ def find_cadence_patterns(main_signal, cadence_pattern, min_preceding_chords=2, 
 
     return matches
 
-
-def eval_silhouette_score(X, max=None):
-    scores = []
-    Sum_of_squared_distances = []
-    max = max or int(len(X) / 2)
-    K = range(2, max)
-    for k in K:
-        kmeans = MODEL(n_init=10, n_clusters=k, random_state=0)
-        km = kmeans.fit(X)
-        # labels = km.predict(X_train)
-
-        labels = km.labels_
-        score = silhouette_score(X, labels, metric='euclidean')
-        Sum_of_squared_distances.append(km.inertia_)
-        print(score, k)
-        scores.append(score)
-
-    fig, ax1 = plt.subplots()
-
-    color = 'blue'
-    ax1.set_xlabel('k')
-    ax1.set_ylabel('Silhouette Score', color=color)
-    ax1.plot(K, scores, 'bx-', color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
-
-    ax2 = ax1.twinx()
-    color = 'red'
-    ax2.set_ylabel('Sum of Squared Distances', color=color)
-    ax2.plot(K, Sum_of_squared_distances, 'rx-', color=color)
-    ax2.tick_params(axis='y', labelcolor=color)
-
-    plt.title('Silhouette Score and Sum of Squared Distances for k')
-    fig.tight_layout()
-    plt.show()
 
 
 def eval_best_k(X, min_clusters=2, max_clusters=None, convergence_threshold=0.001):
@@ -152,7 +117,7 @@ def plot_data(data):
     plt.xlabel("Value")
     plt.ylabel("Density")
     plt.title("Density Plot of Data by Index")
-    plt.legend(title="Index")
+    plt.legend(title="SONG INDEX")
     plt.grid(True)
     plt.show()
 
@@ -275,7 +240,7 @@ def print_chord_patterns_by_cluster(chord_signals, labels, num_clusters, mode="m
 
 
 if __name__ == '__main__':
-    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/test_sample", mode="major")
+    songs = loadSongCollection(r"/mnt/f/dataset/aimyon", mode="major")
     #songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
 
     chord_signals = []
@@ -307,6 +272,7 @@ if __name__ == '__main__':
     X_train = np.array(chord_labels)
 
     anlyzer = ChordProgressionAnalyzer(X_train)
-    anlyzer.plotConcatenatedSignal()
+    #anlyzer.plotConcatenatedSignal()
     anlyzer.analyze_signal_variance()
+    anlyzer.analyze_progression_position_compoment()
 
