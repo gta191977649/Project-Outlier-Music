@@ -15,6 +15,7 @@ from sklearn.utils.class_weight import compute_sample_weight
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
 import seaborn as sns
+from model.isolation_tree import *
 
 MODEL = KMeans
 
@@ -301,60 +302,20 @@ if __name__ == '__main__':
             cadence_signal = extractChordNumeralValues(cadece)
             matches = find_cadence_patterns(x, cadence_signal, min_preceding_chords=2)
             for start, end in matches:
-                chord_signals.append(x[start:end])
+                #chord_signals.append(x[start:end])
                 chord_labels.append(chords[start:end])
             # plotHarmonicProgression(chord_singal)
 
     # X_train = stretch_to_max_length(chord_singals)
-    X_train = np.array(chord_signals)
+    X_train = np.array(chord_labels) # The Tokenization processing is done in ChordProgressionAnalyzer
 
-    plot_data(X_train)
+    print(X_train.shape)
+    analyzer = ChordProgressionIsolationForest(X_train)
+    print(analyzer.vectorized_progressions)
+    print(analyzer.vectorized_progressions)
+    outliers = analyzer.detect_outliers()
+    print("Outlier indices:", np.where(outliers == -1)[0])
+    analyzer.visualize_anomaly_scores()
 
-    print(f"Total: {X_train.shape[0]}")
-    #eval_silhouette_score(X_train)
+    analyzer.print_outliers()
 
-    #k = eval_best_k(X_train)
-    k = 103
-
-    kmeans = MODEL(n_init=10, n_clusters=k, random_state=0)
-    km = kmeans.fit(X_train)
-    centroids = kmeans.cluster_centers_
-    labels = kmeans.predict(X_train)
-
-    print(f"N of centroids: {len(centroids)}")
-    plot_clusters(X_train, labels, centroids, k=k, style="default")
-
-    plot_pattern_frequency(chord_signals, labels)
-
-    # Print chord patterns by cluster
-    print_chord_patterns_by_cluster(chord_signals, labels, k)
-
-    sorted_pattern = sort_pattern_by_cluster_frequency(chord_signals, labels)
-
-    np.save("pattern.npy", sorted_pattern)
-    print(f"Pattern")
-
-
-def test():
-    file = r"F:\music4all\pop_h5\0XTBHHzLg9mngdvU.h5"
-    song = Song.from_h5(file)
-
-    labels = song.extractChordProgressionLabels(transposed=True)
-    signal = extractChordNumeralValues(labels)
-    signal = filterRepeatSignal(signal)
-    labels = filterRepeatSignal(labels)
-    cadence_signal = extractChordNumeralValues([
-        "G:maj", "A:min",  # perfect cadence V → I
-    ])
-
-    matches = find_cadence_patterns(signal, cadence_signal, min_preceding_chords=2)
-
-    print(f"Chord Signal: {signal}")
-    print(f"Chord Label: {labels}")
-    print(f"Cadence Signal: {cadence_signal}")
-    if matches:
-        print(f"Found {len(matches)} cadence pattern(s):")
-        for start, end in matches:
-            print(f"  Position {start} to {end}: {labels[start:end]}")
-    else:
-        print("No cadence patterns found.")

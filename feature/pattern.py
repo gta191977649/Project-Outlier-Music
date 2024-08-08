@@ -203,4 +203,3 @@ def find_cadence_patterns(main_signal, cadence_pattern, min_preceding_chords=2, 
                     matches.append((i - min_preceding_chords, i + pattern_length))
 
     return matches
-

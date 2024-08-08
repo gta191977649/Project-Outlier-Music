@@ -5,24 +5,43 @@ from feature import extract as feature
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# key_map = {
+#     "C": 1,
+#     "C#": 1.5,
+#     "Db": 1.5,
+#     "D": 2,
+#     "D#": 2.5,
+#     "Eb": 2.5,
+#     "E": 3,
+#     "F": 4,
+#     "F#": 4.5,
+#     "Gb": 4.5,
+#     "G": 5,
+#     "G#": 5.5,
+#     "Ab": 5.5,
+#     "A": 6,
+#     "A#": 6.5,
+#     "Bb": 6.5,
+#     "B": 7
+# }
 key_map = {
-    "C": 0,
-    "C#": 0.5,
-    "Db": 0.5,
-    "D": 1,
-    "D#": 1.5,
-    "Eb": 1.5,
-    "E": 2,
-    "F": 2.5,
-    "F#": 3,
-    "Gb": 3,
-    "G": 3.5,
-    "G#": 4,
-    "Ab": 4,
-    "A": 4.5,
-    "A#": 5,
-    "Bb": 5,
-    "B": 5.5
+    "C": 1,
+    "C#": 2,
+    "Db": 2,
+    "D": 3,
+    "D#": 4,
+    "Eb": 4,
+    "E": 5,
+    "F": 6,
+    "F#": 7,
+    "Gb": 7,
+    "G": 8,
+    "G#": 9,
+    "Ab": 9,
+    "A": 10,
+    "A#": 11,
+    "Bb": 11,
+    "B": 12
 }
 # Initialize an empty reverse map
 reverse_key_map = {}
