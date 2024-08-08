@@ -117,34 +117,34 @@ def plot_chord_pattern_3d(X_train):
 
 
 if __name__ == '__main__':
-    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
-
-    chord_signals = []
-    chord_labels = []
-    cadence_consider = [
-        ["G:maj", "C:maj"],  # Perfect Cadence
-        ["F:maj", "C:maj"],  # Plagal Cadence
-        ["C:maj", "G:maj"],  # Half Cadence
-        ["D:maj", "G:maj"],  # Half Cadence
-        ["F:maj", "G:maj"],  # Half Cadence
-        ["G:maj", "A:min"],  # Deceptive Cadence
-    ]
-    for target_song in songs:
-        chords = target_song.extractChordProgressionLabels(transposed=True)
-        x = extractChordNumeralValues(chords)
-        x = filterRepeatSignal(x)
-        chords = filterRepeatSignal(chords)
-
-        # do cadence match
-        for cadence in cadence_consider:
-            cadence_signal = extractChordNumeralValues(cadence)
-            matches = pattern.find_cadence_patterns(x, cadence_signal, min_preceding_chords=2)
-            for start, end in matches:
-                chord_signals.append(x[start:end])
-                chord_labels.append(chords[start:end])
+    # songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
+    #
+    # chord_signals = []
+    # chord_labels = []
+    # cadence_consider = [
+    #     ["G:maj", "C:maj"],  # Perfect Cadence
+    #     ["F:maj", "C:maj"],  # Plagal Cadence
+    #     ["C:maj", "G:maj"],  # Half Cadence
+    #     ["D:maj", "G:maj"],  # Half Cadence
+    #     ["F:maj", "G:maj"],  # Half Cadence
+    #     ["G:maj", "A:min"],  # Deceptive Cadence
+    # ]
+    # for target_song in songs:
+    #     chords = target_song.extractChordProgressionLabels(transposed=True)
+    #     x = extractChordNumeralValues(chords)
+    #     x = filterRepeatSignal(x)
+    #     chords = filterRepeatSignal(chords)
+    #
+    #     # do cadence match
+    #     for cadence in cadence_consider:
+    #         cadence_signal = extractChordNumeralValues(cadence)
+    #         matches = pattern.find_cadence_patterns(x, cadence_signal, min_preceding_chords=2)
+    #         for start, end in matches:
+    #             chord_signals.append(x[start:end])
+    #             chord_labels.append(chords[start:end])
 
     #X_train = np.array(chord_signals)
-    X_train = np.load(f"/Users/nurupo/Desktop/dev/Project-Outlier-Music/task/chap_5/pattern.npy")
+    X_train = np.load(f"./pattern.npy")
 
     # Plot the heatmap
     #plot_chord_sequence_heatmap(X_train)

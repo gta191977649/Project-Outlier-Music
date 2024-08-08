@@ -277,7 +277,7 @@ def print_chord_patterns_by_cluster(chord_signals, labels, num_clusters, mode="m
 
 
 if __name__ == '__main__':
-    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/test_sample", mode="major")
+    songs = loadSongCollection(r"/mnt/f/dataset/aimyon", mode="major")
     #songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
 
     chord_signals = []
@@ -314,7 +314,7 @@ if __name__ == '__main__':
     #eval_silhouette_score(X_train)
 
     #k = eval_best_k(X_train)
-    k = 103
+    k = 107
 
     kmeans = MODEL(n_init=10, n_clusters=k, random_state=0)
     km = kmeans.fit(X_train)
