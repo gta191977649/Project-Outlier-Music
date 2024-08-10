@@ -5,7 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/ssmnet_ISMIR2023" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/dataset" />
     </content>
-    <orderEntry type="jdk" jdkName="WSL-P11" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Project-Outlier-Music11" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

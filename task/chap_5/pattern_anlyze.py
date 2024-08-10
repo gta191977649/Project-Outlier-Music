@@ -240,8 +240,8 @@ def print_chord_patterns_by_cluster(chord_signals, labels, num_clusters, mode="m
 
 
 if __name__ == '__main__':
-    songs = loadSongCollection(r"/mnt/f/dataset/aimyon", mode="major")
-    #songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
+    #songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/test_sample", mode="major")
+    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
 
     chord_signals = []
     chord_labels = []

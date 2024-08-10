@@ -3,19 +3,28 @@ from sklearn.ensemble import IsolationForest
 import matplotlib.pyplot as plt
 
 from feature.chord import *
+from sklearn.preprocessing import OneHotEncoder
 
 class ChordProgressionIsolationForest:
-    def __init__(self, chord_progressions):
+    def __init__(self, chord_progressions,tokenMethod="numeral"):
         self.chord_progressions = chord_progressions
-        self.vectorized_progressions = self._vectorize_progressions()
+        self.vectorized_progressions = self._vectorize_progressions(method=tokenMethod)
         self.outlier_detector = IsolationForest(contamination=0.1, random_state=42)
         print(self.vectorized_progressions)
 
-    def _vectorize_progressions(self):
-        return np.array([
-            extractChordNumeralValues(progression)
-            for progression in self.chord_progressions
-        ])
+    def _vectorize_progressions(self, method="numeral"):
+        if method == "numeral":
+            return np.array([
+                extractChordNumeralValues(progression)
+                for progression in self.chord_progressions
+            ])
+        elif method == "onehot":
+            flattened = np.array(self.chord_progressions).flatten().reshape(-1, 1)
+            encoder = OneHotEncoder(sparse=False)
+            onehot = encoder.fit_transform(flattened)
+            return onehot.reshape(len(self.chord_progressions), -1)
+        else:
+            raise ValueError("Unsupported vectorization method")
 
     def detect_outliers(self):
         self.outlier_detector.fit(self.vectorized_progressions)

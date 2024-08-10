@@ -6,21 +6,26 @@ import matplotlib.pyplot as plt
 from scipy.signal import welch
 from matplotlib.gridspec import GridSpec
 import japanize_matplotlib
+from sklearn.preprocessing import OneHotEncoder
+
 class ChordProgressionAnalyzer():
     def __init__(self, chord_progressions):
         self.chord_progressions = chord_progressions
         self.vectorized_progressions = self._vectorize_progressions()
 
-    def _vectorize_progressions(self):
-        return np.array([
-            extractChordNumeralValues(progression)
-            for progression in self.chord_progressions
-        ])
-        # # Use TPS
-        # return np.array([
-        #     extractTontalPitchDistancePattern(progression,key="C:maj",mode="profile")
-        #     for progression in self.chord_progressions
-        # ])
+    def _vectorize_progressions(self, method="numeral"):
+        if method == "numeral":
+            return np.array([
+                extractChordNumeralValues(progression)
+                for progression in self.chord_progressions
+            ])
+        elif method == "onehot":
+            flattened = np.array(self.chord_progressions).flatten().reshape(-1, 1)
+            encoder = OneHotEncoder(sparse=False)
+            onehot = encoder.fit_transform(flattened)
+            return onehot.reshape(len(self.chord_progressions), -1)
+        else:
+            raise ValueError("Unsupported vectorization method")
 
     def plotHeatMap(self):
         sns.heatmap(self.vectorized_progressions)
