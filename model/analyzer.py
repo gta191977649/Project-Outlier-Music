@@ -7,8 +7,10 @@ from scipy.signal import welch
 from matplotlib.gridspec import GridSpec
 import japanize_matplotlib
 from sklearn.preprocessing import OneHotEncoder
+import networkx as nx
 
-class ChordProgressionAnalyzer():
+
+class ChordProgressionAnalyzer:
     def __init__(self, chord_progressions):
         self.chord_progressions = chord_progressions
         self.vectorized_progressions = self._vectorize_progressions()
@@ -80,6 +82,7 @@ class ChordProgressionAnalyzer():
         plt.tight_layout()
         plt.show()
 
+
     def analyze_progression_position_compoment(self):
         x_transposed = self.vectorized_progressions.T
         num_rows = x_transposed.shape[0]
@@ -121,3 +124,4 @@ class ChordProgressionAnalyzer():
 
         plt.tight_layout()
         plt.show()
+

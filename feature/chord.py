@@ -104,10 +104,53 @@ def translateNumeralValuesToChords(numeral_values, mode="major"):
             print(f"Numeral value '{value}' does not correspond to a known chord.")
 
     return chord_array
-def extractCadencePatternFeature(chord_label_array):
+def convert_roman_label(chord_sequence, mode):
+    print(chord_sequence)
+    # Define the diatonic chords and their Roman numerals for C major and C minor
+    diatonic_chords = {
+        "major": {
+            "C:maj": "I", "D:min": "ii", "E:min": "iii", "F:maj": "IV",
+            "G:maj": "V", "A:min": "vi", "B:dim": "vii°"
+        },
+        "minor": {
+            "C:min": "i", "D:dim": "ii°", "Eb:maj": "III", "F:min": "iv",
+            "G:min": "v", "Ab:maj": "VI", "Bb:maj": "VII"
+        }
+    }
 
-    cadence_pattern = []
+    # Define the possible secondary dominants
+    secondary_dominants = {
+        "major": {
+            "D:maj": "V/V", "E:maj": "V/vi", "A:maj": "V/ii",
+            "B:maj": "V/iii", "C:maj": "V/IV"
+        },
+        "minor": {
+            "C:maj": "V/iv", "D:maj": "V/v", "Eb:maj": "V/VI",
+            "F:maj": "V/VII", "G:maj": "V/III"
+        }
+    }
 
+    roman_numerals = []
+    for i, chord in enumerate(chord_sequence):
+        # Check if the chord is a potential secondary dominant
+        if chord in secondary_dominants[mode]:
+            # Look ahead to see if the next chord matches the secondary dominant's target
+            if i + 1 < len(chord_sequence):
+                next_chord = chord_sequence[i + 1]
+                target_chord = secondary_dominants[mode][chord].split('/')[1]
+                if next_chord in diatonic_chords[mode] and diatonic_chords[mode][next_chord].lower() == target_chord:
+                    roman_numerals.append(secondary_dominants[mode][chord])
+                    continue
+
+        # If not a secondary dominant, use the diatonic chord label
+        if chord in diatonic_chords[mode]:
+            roman_numerals.append(diatonic_chords[mode][chord])
+        else:
+            # For any non-diatonic chords, use a simple representation
+            root, quality = chord.split(':')
+            roman_numerals.append(f"{root}({quality})")
+
+    return roman_numerals
 
 
 def extractChordSummrisation(song : Song,window =16,start_on_down_beat = True):
@@ -229,6 +272,9 @@ def plotChordSummary(song :Song, summary):
     #fig.suptitle(f"{song.title} @{song.key} {song.mode}", fontsize=16, fontweight='bold')
     #plt.subplots_adjust(top=0.90)
     plt.show()
+
+
+
 
 if __name__ == '__main__':
     singal = extractChordNumeralValues(["C:maj","G:maj"])

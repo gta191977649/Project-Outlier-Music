@@ -146,6 +146,42 @@ class Song:
         song.section = section
         return song
 
+    def convert_chord_format(self,chord_sequence):
+        def convert_single_chord(chord):
+            # Check if the chord is already in the correct format
+            if ':' in chord:
+                return chord
+
+            # Extract the root note
+            root = chord[0].upper()
+            if len(chord) > 1 and chord[1] in ['#', 'b']:
+                root += chord[1]
+                quality = chord[2:]
+            else:
+                quality = chord[1:]
+
+            # Convert quality
+            if quality == '':
+                quality = 'maj'
+            elif quality == 'm':
+                quality = 'min'
+            elif quality in ['dim', 'aug', 'sus2', 'sus4']:
+                pass  # Keep these qualities as is
+            elif quality == '7':
+                quality = 'dom7'
+            elif quality == 'maj7':
+                pass  # Keep maj7 as is
+            elif quality == 'm7':
+                quality = 'min7'
+            elif quality == 'dim7':
+                pass  # Keep dim7 as is
+            else:
+                # For any other qualities, keep them as is
+                pass
+
+            return f"{root}:{quality}"
+
+        return [convert_single_chord(chord) for chord in chord_sequence]
     def extractChordProgressionLabels(self,transposed = False):
         chordProgressionLabels = []
         chord_sequence = transposed and self.chord_transposed or self.chord
@@ -153,4 +189,4 @@ class Song:
             time, beat, label = chord
             if not label == "N":
                 chordProgressionLabels.append(label)
-        return chordProgressionLabels
+        return self.convert_chord_format(chordProgressionLabels)
