@@ -7,9 +7,15 @@ def loadSongCollection(PATH, mode=None):
             if file.endswith(".h5"):
                 filepath = os.path.join(root, file)
                 song = Song.from_h5(filepath)
-                if mode is None or song.mode == mode:
+                #if mode is None or song.mode == mode:
+                if not mode is None:
+                    if song.mode == mode: song_collections.append(song)
+                else:
                     song_collections.append(song)
+
+
     return song_collections
+
 
 def filterRepeatSignal(signal):
     current = None
@@ -19,4 +25,5 @@ def filterRepeatSignal(signal):
             out.append(x)
             current = x
     return out
+
 

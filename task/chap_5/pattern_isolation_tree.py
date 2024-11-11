@@ -16,41 +16,12 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
 import seaborn as sns
 from model.isolation_tree import *
+from sklearn.decomposition import PCA
+import umap
 
 MODEL = KMeans
 
 
-def find_cadence_patterns(main_signal, cadence_pattern, min_preceding_chords=2, allow_repetitions=True):
-    """
-    Find multiple occurrences of a cadence pattern in the main signal using exact matching,
-    with an option to allow or disallow repetitive chords.
-
-    Parameters:
-    - main_signal: The main chord progression signal (list of numbers)
-    - cadence_pattern: The cadence pattern to search for (list of numbers)
-    - min_preceding_chords: Minimum number of chords required before the cadence pattern (default: 2)
-    - allow_repetitions: Whether to allow repetitive chords in the progression (default: True)
-
-    Returns:
-    - A list of tuples, each containing (start_index, end_index) of found patterns
-    """
-    pattern_length = len(cadence_pattern)
-    matches = []
-
-    for i in range(min_preceding_chords, len(main_signal) - pattern_length + 1):
-        # Check if the cadence pattern matches exactly
-        if main_signal[i:i + pattern_length] == cadence_pattern:
-            # Check if there are enough preceding chords
-            if i >= min_preceding_chords:
-                # If repetitions are not allowed, check for unique chords
-                if not allow_repetitions:
-                    progression = main_signal[i - min_preceding_chords:i + pattern_length]
-                    if len(set(progression)) == len(progression):
-                        matches.append((i - min_preceding_chords, i + pattern_length))
-                else:
-                    matches.append((i - min_preceding_chords, i + pattern_length))
-
-    return matches
 
 
 def eval_silhouette_score(X, max=None):
@@ -277,19 +248,28 @@ def print_chord_patterns_by_cluster(chord_signals, labels, num_clusters, mode="m
             print(f"Chord Labels: {chord_labels}")
 
 
-if __name__ == '__main__':
-    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/test_sample", mode="major")
-    #songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
-
+def run_detection_with_all(mode):
+    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/h5_pop_all", mode=mode)
+    # songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
     chord_signals = []
     chord_labels = []
-    cadece_consider = [
+    cadece_consider = {}
+    cadece_consider["major"] = [
         ["G:maj", "C:maj"],  # Perfect Cadence
         ["F:maj", "C:maj"],  # Plagal Cadence
         ["C:maj", "G:maj"],  # Half Cadence
-        ["D:min", "G:maj"],  # Half Cadence
+        ["D:maj", "G:maj"],  # Half Cadence
         ["F:maj", "G:maj"],  # Half Cadence
         ["G:maj", "A:min"],  # Deceptive Cadence
+    ]
+
+    cadece_consider["minor"] = [
+        ["E:min", "A:min"],  # Perfect Cadence
+        ["D:min", "A:min"],  # Plagal Cadence
+        ["A:min", "E:min"],  # Half Cadence
+        ["B:dim", "E:min"],  # Half Cadence
+        ["D:min", "E:min"],  # Half Cadence
+        ["E:min", "F#:maj"],  # Deceptive Cadence
     ]
     for target_song in songs:
         chords = target_song.extractChordProgressionLabels(transposed=True)
@@ -297,27 +277,94 @@ if __name__ == '__main__':
         x = filterRepeatSignal(x)
         chords = filterRepeatSignal(chords)
 
-        for cadece in cadece_consider:
+        for cadece in cadece_consider[mode]:
             cadence_signal = extractChordNumeralValues(cadece)
             matches = find_cadence_patterns(x, cadence_signal, min_preceding_chords=2)
             for start, end in matches:
-                #chord_signals.append(x[start:end])
-                label = convert_roman_label(chords[start:end],mode="major")
+                chord_signals.append(x[start:end])
+                label = convert_roman_label(chords[start:end], mode=mode)
                 chord_labels.append(label)
+                # chord_labels.append(chords[start:end])
             # plotHarmonicProgression(chord_singal)
 
     # X_train = stretch_to_max_length(chord_singals)
-    X_train = np.array(chord_labels) # The Tokenization processing is done in ChordProgressionAnalyzer
+    X_train = np.array(chord_labels)  # The Tokenization processing is done in ChordProgressionAnalyzer
+    # X_train = X_train.T[0]
+    isolation_tree = ChordProgressionIsolationForest(X_train, tokenMethod="onehot", dimReduceMethod=None)  # numeral
 
-    print(X_train.shape)
-    isolation_tree = ChordProgressionIsolationForest(X_train,tokenMethod="onehot")
-    print(isolation_tree.vectorized_progressions)
-    print(isolation_tree.vectorized_progressions)
     outliers = isolation_tree.detect_outliers()
     print("Outlier indices:", np.where(outliers == -1)[0])
-    isolation_tree.visualize_anomaly_scores()
+
+    #isolation_tree.visualize_progression_tree_hierarchical(outliers_only=True)
+    # isolation_tree.plot_result(annOutlier=True)
+    # isolation_tree.visualize_anomaly_scores()
 
     isolation_tree.print_outliers()
-    #isolation_tree.visualize_progression_tree_hierarchical()
-    isolation_tree.visualize_in_web(horizontal_spacing=18,node_size_scale=5,font_size=15)
+    isolation_tree.save_outliers("outliers_all.csv")
 
+    #isolation_tree.visualize_progression_dendrogram(outliers_only=True)
+    # isolation_tree.visualize_in_web(horizontal_spacing=18,node_size_scale=5,font_size=15)
+    print(f"Outliers:{len(np.where(outliers == -1)[0])} of {len(X_train)} Data")
+def run_detection_positional(mode,position):
+    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/h5_pop_all", mode=mode)
+    #songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
+
+    chord_signals = []
+    chord_labels = []
+    cadece_consider = {}
+    cadece_consider["major"] = [
+        ["G:maj", "C:maj"],  # Perfect Cadence
+        ["F:maj", "C:maj"],  # Plagal Cadence
+        ["C:maj", "G:maj"],  # Half Cadence
+        ["D:maj", "G:maj"],  # Half Cadence
+        ["F:maj", "G:maj"],  # Half Cadence
+        ["G:maj", "A:min"],  # Deceptive Cadence
+    ]
+
+    cadece_consider["minor"] = [
+        ["E:min", "A:min"],  # Perfect Cadence
+        ["D:min", "A:min"],  # Plagal Cadence
+        ["A:min", "E:min"],  # Half Cadence
+        ["B:dim", "E:min"],  # Half Cadence
+        ["D:min", "E:min"],  # Half Cadence
+        ["E:min", "F#:maj"],  # Deceptive Cadence
+    ]
+    for target_song in songs:
+        chords = target_song.extractChordProgressionLabels(transposed=True)
+        x = extractChordNumeralValues(chords)
+        x = filterRepeatSignal(x)
+        chords = filterRepeatSignal(chords)
+
+        for cadece in cadece_consider[mode]:
+            cadence_signal = extractChordNumeralValues(cadece)
+            matches = find_cadence_patterns(x, cadence_signal, min_preceding_chords=2)
+            for start, end in matches:
+                chord_signals.append(x[start:end])
+                label = convert_roman_label(chords[start:end], mode=mode)
+                chord_labels.append(label)
+                #chord_labels.append(chords[start:end])
+            # plotHarmonicProgression(chord_singal)
+
+    # X_train = stretch_to_max_length(chord_singals)
+    X_train = np.array(chord_labels)  # The Tokenization processing is done in ChordProgressionAnalyzer
+
+    X_train = X_train.T[position]
+
+    #print(X_train)
+    isolation_tree = ChordProgressionIsolationForest(X_train, tokenMethod="onehot", dimReduceMethod=None)  # numeral
+
+    outliers = isolation_tree.detect_outliers()
+    print("Outlier indices:", np.where(outliers == -1)[0])
+
+    #isolation_tree.plot_result(annOutlier=True)
+    #isolation_tree.visualize_anomaly_scores()
+
+
+    #isolation_tree.visualize_progression_tree_hierarchical()
+    #isolation_tree.visualize_in_web(horizontal_spacing=10,node_size_scale=10,font_size=15)
+    #isolation_tree.print_outliers()
+    isolation_tree.save_outliers(f"outliers_pos_{position}.csv")
+
+if __name__ == '__main__':
+    run_detection_with_all("major")
+    #run_detection_positional("major",0)

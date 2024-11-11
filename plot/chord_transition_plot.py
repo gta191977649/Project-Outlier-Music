@@ -10,8 +10,9 @@ class ChordTransitionPlot:
     def __init__(self,title = "Chord Transition Graph",mode="major"):
         self.mode = mode
         self.title = title
-        self.roman_scale = ['I', 'V', 'II', 'VI', 'III', 'VII', 'bV', 'bII', 'bVI', 'bIII',
-                                     'bVII', 'IV']
+        self.roman_scale_major = ['I', 'V', 'II', 'VI', 'III', 'VII', 'bV', 'bII', 'bVI', 'bIII', 'bVII', 'IV']
+        self.roman_scale_minor = ['bIII', 'bVII', 'IV', 'i', 'v', 'ii', 'vi', 'iii', 'vii', 'bV', 'bII', 'bVI']
+
         self.circle_of_fifths_maj = ['Cmaj', 'Gmaj', 'Dmaj', 'Amaj', 'Emaj', 'Bmaj', 'F#maj', 'C#maj', 'Abmaj', 'Ebmaj',
                                      'Bbmaj', 'Fmaj']
         self.circle_of_fifths_minor = ['Cmin', 'Gmin', 'Dmin', 'Amin', 'Emin', 'Bmin', 'F#min', 'C#min', 'Abmin',
@@ -47,8 +48,13 @@ class ChordTransitionPlot:
     def initialize_node_positions(self):
         # Initialize positions for major chords in the outer circle
 
-        for i, key in enumerate(self.roman_scale):
-            angle = 2 * np.pi * i / len(self.roman_scale)  # Evenly space nodes around the circle
+        if self.mode == "major":
+            roman_scale = self.roman_scale_major
+        else:  # minor mode
+            roman_scale = self.roman_scale_minor
+
+        for i, key in enumerate(roman_scale):
+            angle = 2 * np.pi * i / len(roman_scale)  # Evenly space nodes around the circle
             self.label_pos[key] = (self.node_label_distance * np.cos(angle), self.node_label_distance * np.sin(angle))
             self.chord_scale_label.add_node(key)
 

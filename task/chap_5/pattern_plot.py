@@ -147,8 +147,8 @@ if __name__ == '__main__':
     X_train = np.load(f"./pattern.npy")
 
     # Plot the heatmap
-    #plot_chord_sequence_heatmap(X_train)
-    plot_chord_pattern_3d(X_train)
+    plot_chord_sequence_heatmap(X_train)
+    #plot_chord_pattern_3d(X_train)
 
     print(X_train)
     print(X_train.shape)

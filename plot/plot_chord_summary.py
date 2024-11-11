@@ -152,11 +152,11 @@ def summaryChordPattern(chordsArray,window = 16):
 
         # Set title and labels for each subplot
         ax.set_title(f"Chord Progression: {color_idx} ({len(details['matches'])} Matches)")
-        ax.set_ylabel('Angle')
-        ax.set_xticks(x_values)
+        #ax.set_ylabel('Angle')
+        #ax.set_xticks(x_values)
         #ax.set_xticklabels(chord_beat_ls, rotation='vertical', fontsize=8)
         ax.set_xlim(left=0, right=max(x_values))
-        ax.set_ylim(min(chord_theta_ls), max(chord_theta_ls))
+        #ax.set_ylim(min(chord_theta_ls), max(chord_theta_ls))
         # ax.legend()
 
     # Finalizing the plot
@@ -180,12 +180,14 @@ def summaryChordPattern(chordsArray,window = 16):
     return output
 
 
+
 if __name__ == '__main__':
     song = Song.from_h5("/Users/nurupo/Desktop/dev/music4all/bk/17さいのうた  ユイカMV.h5")
     signal = getChordVectorsAngleFromChords(song.chord_transposed)
     #signal = signal[:300]
 
     s = summaryChordPattern(song.chord_transposed[:300])
+
 
     for p in s:
         print(format_chord_progression(p["pattern"]),p["roman"],p["matches"])

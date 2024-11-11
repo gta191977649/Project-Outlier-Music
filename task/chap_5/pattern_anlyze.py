@@ -241,17 +241,26 @@ def print_chord_patterns_by_cluster(chord_signals, labels, num_clusters, mode="m
 
 if __name__ == '__main__':
     #songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/test_sample", mode="major")
-    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/audio/aimyon", mode="major")
+    songs = loadSongCollection(r"/Users/nurupo/Desktop/dev/music4all/h5_pop_all", mode="major")
 
     chord_signals = []
     chord_labels = []
-    cadece_consider = [
+    cadece_consider_major = [
         ["G:maj", "C:maj"],  # Perfect Cadence
         ["F:maj", "C:maj"],  # Plagal Cadence
         ["C:maj", "G:maj"],  # Half Cadence
         ["D:maj", "G:maj"],  # Half Cadence
         ["F:maj", "G:maj"],  # Half Cadence
         ["G:maj", "A:min"],  # Deceptive Cadence
+    ]
+
+    cadece_consider_minor = [
+        ["E:min", "A:min"],  # Perfect Cadence
+        ["D:min", "A:min"],  # Plagal Cadence
+        ["A:min", "E:min"],  # Half Cadence
+        ["B:dim", "E:min"],  # Half Cadence
+        ["D:min", "E:min"],  # Half Cadence
+        ["E:min", "F#:maj"],  # Deceptive Cadence
     ]
     for target_song in songs:
         chords = target_song.extractChordProgressionLabels(transposed=True)
@@ -260,7 +269,7 @@ if __name__ == '__main__':
         chords = filterRepeatSignal(chords)
 
         # do candence match
-        for cadece in cadece_consider:
+        for cadece in cadece_consider_major:
             cadence_signal = extractChordNumeralValues(cadece)
             matches = find_cadence_patterns(x, cadence_signal, min_preceding_chords=2)
             for start, end in matches:
@@ -273,6 +282,9 @@ if __name__ == '__main__':
 
     anlyzer = ChordProgressionAnalyzer(X_train)
     #anlyzer.plotConcatenatedSignal()
-    anlyzer.analyze_signal_variance()
-    anlyzer.analyze_progression_position_compoment()
+    #anlyzer.analyze_signal_variance()
+    #anlyzer.analyze_progression_position_component()
+    #anlyzer.analyze_progression_position_component_one_plot()
+    anlyzer.analyze_progression_position_component_kde_only()
+    anlyzer.analyze_progression_component()
 

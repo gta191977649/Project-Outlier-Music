@@ -57,13 +57,12 @@ def extractChordNumeralValues(chord_array, mode="major"):
     val_array = []
 
     for chord in chord_array:
+
         # Initialize base to None
         base = None
-
         # Case 1: Chord label with ":" splitter (e.g., C:maj, E:min)
         if ":" in chord:
             base = chord.split(":")[0]
-
         # Case 2: Chord label without ":" splitter (e.g., Cmaj, Emin)
         else:
             # Find the first occurrence of "maj" or "min"
@@ -88,24 +87,72 @@ def extractChordNumeralValues(chord_array, mode="major"):
 
     return val_array
 
+def extractChordNumeralValuesConsiderMode(chord_array):
+    val_array = []
 
-def translateNumeralValuesToChords(numeral_values, mode="major"):
+    for chord in chord_array:
+        # Initialize base and mode flags
+        base = None
+        is_minor = False
+
+        # Check if chord contains ':'
+        if ":" in chord:
+            base, mode = chord.split(":")
+            base = base.strip()  # Ensure no extra spaces in the base
+            if mode.strip() == "min":
+                is_minor = True
+        else:
+            # If no ':', check for "maj" or "min" directly in the chord label
+            if "min" in chord:
+                base = chord.split("min")[0].strip()
+                is_minor = True
+            elif "maj" in chord:
+                base = chord.split("maj")[0].strip()
+            else:
+                base = chord.strip()  # Treat as base with no mode information
+
+        # Map base to key_map and apply minor adjustment if needed
+        if base and base in key_map:
+            value = key_map[base] + (0.5 if is_minor else 0)
+            val_array.append(value)
+        else:
+            print(f"'{chord}' is not a valid chord or its base '{base}' is not in the key map")
+
+    return val_array
+
+
+def number_to_chord_label(number):
+    base_value = int(number) % 12  # Use modulo 12 to handle wrapping
+    base_value = 12 if base_value == 0 else base_value  # Correct for B -> 12
+    is_minor = (number % 1 == 0.5)
+
+    # Get the base chord from reverse_key_map
+    chord_label = reverse_key_map.get(base_value, "Invalid")
+    mode = "min" if is_minor else "maj"
+    return f"{chord_label}"
+
+# Function to translate numeral values to chord labels considering minor/major
+def translateNumeralValuesToChords(numeral_values):
     chord_array = []
 
     for value in numeral_values:
+        # Determine if the chord is minor or major based on .5
+        is_minor = (value % 1) == 0.5
+        base_value = int(value)  # Get the integer part for the base chord
+
         # Get the base chord from the reverse map
-        base_chord = reverse_key_map.get(value, None)
+        base_chord = reverse_key_map.get(base_value % 12, None)  # Modulo to handle wrapping
 
         if base_chord:
-            # Append chord with mode (e.g., C:maj, D:min)
-            chord = f"{base_chord}"
+            # Append the chord with appropriate mode (min or maj)
+            mode = "min" if is_minor else "maj"
+            chord = f"{base_chord}:{mode}"
             chord_array.append(chord)
         else:
             print(f"Numeral value '{value}' does not correspond to a known chord.")
 
     return chord_array
 def convert_roman_label(chord_sequence, mode):
-    print(chord_sequence)
     # Define the diatonic chords and their Roman numerals for C major and C minor
     diatonic_chords = {
         "major": {
@@ -274,6 +321,37 @@ def plotChordSummary(song :Song, summary):
     plt.show()
 
 
+def find_cadence_patterns(main_signal, cadence_pattern, min_preceding_chords=2, allow_repetitions=True):
+    """
+    Find multiple occurrences of a cadence pattern in the main signal using exact matching,
+    with an option to allow or disallow repetitive chords.
+
+    Parameters:
+    - main_signal: The main chord progression signal (list of numbers)
+    - cadence_pattern: The cadence pattern to search for (list of numbers)
+    - min_preceding_chords: Minimum number of chords required before the cadence pattern (default: 2)
+    - allow_repetitions: Whether to allow repetitive chords in the progression (default: True)
+
+    Returns:
+    - A list of tuples, each containing (start_index, end_index) of found patterns
+    """
+    pattern_length = len(cadence_pattern)
+    matches = []
+
+    for i in range(min_preceding_chords, len(main_signal) - pattern_length + 1):
+        # Check if the cadence pattern matches exactly
+        if main_signal[i:i + pattern_length] == cadence_pattern:
+            # Check if there are enough preceding chords
+            if i >= min_preceding_chords:
+                # If repetitions are not allowed, check for unique chords
+                if not allow_repetitions:
+                    progression = main_signal[i - min_preceding_chords:i + pattern_length]
+                    if len(set(progression)) == len(progression):
+                        matches.append((i - min_preceding_chords, i + pattern_length))
+                else:
+                    matches.append((i - min_preceding_chords, i + pattern_length))
+
+    return matches
 
 
 if __name__ == '__main__':

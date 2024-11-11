@@ -5,13 +5,11 @@ from pychord import Chord
 import os
 import pandas as pd
 if __name__ == '__main__':
-    TARGET_MODE = "major"
+    TARGET_MODE = "minor"
 
     PATH = "/Users/nurupo/Desktop/dev/music4all/"
     audio_folder = "audios"
     path_csv = os.path.join(PATH, "stratified_songs_pop.csv")
-
-
 
     song_collections = []
     if os.path.exists(path_csv):
@@ -20,7 +18,8 @@ if __name__ == '__main__':
             id = item['id']
             h5_path = os.path.join(PATH, audio_folder, id + ".h5")
             song = Song.from_h5(h5_path)
-            song_collections.append(song)
+            if song.mode == TARGET_MODE:
+                song_collections.append(song)
 
     plot = ChordTransitionPlot(f"Chord Transition Graph -({TARGET_MODE})", mode=TARGET_MODE)
 
